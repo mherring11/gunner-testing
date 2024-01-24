@@ -56,6 +56,15 @@ test('Register accounts from sheet data', async ({ page }) => {
             
 
             await page.waitForLoadState('networkidle');
+
+            const windowSidingQuestionVisible = await page.isVisible('text="Would you also like information on window or siding installation?"');
+            if (windowSidingQuestionVisible) {
+                const yesButtonForWindowSiding = await page.waitForSelector('text="Would you also like information on window or siding installation?" >> ../.. >> button[value="YES"]');
+                await yesButtonForWindowSiding.waitForElementState('stable');
+                await yesButtonForWindowSiding.click({ force: true });
+                console.log('Clicked YES for window/siding installation information.');
+            }
+
             // Handle dynamic questions, clicking "YES" or "NO" as appropriate
             const yesButtons = await page.$$(`button[value="YES"]`);
             for (const button of yesButtons) {
