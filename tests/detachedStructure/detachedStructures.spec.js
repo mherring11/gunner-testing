@@ -14,30 +14,30 @@ async function fetchDataFromSheet() {
       }
     );
     console.log("Data fetched successfully:", response.data);
-    return response.data; // Return the fetched data
+    return response.data;
   } catch (error) {
     console.error("Error fetching data from sheet:", error);
-    return []; // Return an empty array in case of an error
+    return []; 
   }
 }
 
 // -----------------PRESS PLAY BUTTON----------------------
 
 test('Check "Detached Structure"', async ({ browser }) => {
-  // Set a longer timeout for this test if it's taking more than 30 seconds
-  test.setTimeout(360000); // e.g., 360 seconds
+  
+  test.setTimeout(360000);
 
-  // Create a new browser context for a clean session
+  // Create a new browser for a clean session
   const context = await browser.newContext();
   const page = await context.newPage();
 
-  // Listener to close any new page (tab) that opens
+  
   page.context().on("page", async (newPage) => {
     console.log("New page opened:", newPage.url());
     await newPage.close();
   });
 
-  // Clear cookies before starting the email checking process
+  // Clear cookies
   await context.clearCookies();
 
   // Go to Gmail login page
@@ -45,7 +45,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
   await page.fill('input[type="email"]', "playwright021324@gmail.com");
   await page.click("#identifierNext");
   await page.waitForNavigation();
-  await page.fill('input[type="password"]', "Playwright24!"); // Use environment variables for passwords
+  await page.fill('input[type="password"]', "Playwright24!");
   await page.click("#passwordNext");
   await page.waitForNavigation();
 
@@ -68,7 +68,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
     return new Promise((resolve) => {
       const element = document.querySelector("div.aeJ");
       const totalScroll = element.scrollHeight - element.clientHeight;
-      const step = totalScroll / 40; // smaller step for a smoother scroll
+      const step = totalScroll / 40;
       let scrolled = 0;
 
       const scrollDown = setInterval(() => {
@@ -109,19 +109,19 @@ test('Check "Detached Structure"', async ({ browser }) => {
   // Navigate to the login page
   await page.goto("https://estimatorstg.gunnerroofing.com/login");
 
-  // Wait for the email input to be visible, fill it, and assert it is filled
+  // Wait for the email input to be visible, fill it.
   await page.waitForSelector("#mui-1", { state: "visible" });
   await page.fill("#mui-1", "playwright021324@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
-  console.log(`Email Input Value: ${emailValue}`); // Should log the filled email
+  console.log(`Email Input Value: ${emailValue}`);
 
-  // Wait for the password input to be visible, fill it, and assert it is filled
+  // Wait for the password input to be visible, fill it.
   await page.waitForSelector("#mui-2", { state: "visible" });
   await page.fill("#mui-2", "Playwright24!");
   const passwordValue = await page.$eval("#mui-2", (el) => el.value);
-  console.log(`Password Input Value: ${passwordValue}`); // Should log the filled password
+  console.log(`Password Input Value: ${passwordValue}`);
 
-  await page.click('button:has-text("SIGN IN")'), // Adjust the selector if necessary
+  await page.click('button:has-text("SIGN IN")'),
     // Remove the event listener after the test
     page.context().removeListener("page", async (newPage) => {
       await newPage.close();
@@ -136,16 +136,14 @@ test('Check "Detached Structure"', async ({ browser }) => {
   );
   await hangingIconsContainer.scrollIntoViewIfNeeded();
 
-  // Wait for 3 seconds
   await page.waitForTimeout(3000);
 
-  // Smooth scroll to the second element with class 'result_sectionSubhead__Qmam7'
+  // Smooth scroll to the second element
   await page.evaluate(() => {
     const element = document.querySelector(".result_sectionSubtitle__1mAzM");
     element.scrollIntoView({ behavior: "smooth" });
   });
 
-  // Wait for 3 seconds to ensure the scroll has completed
   await page.waitForTimeout(3000);
 
   console.log("Logged in, starting color selection verification.");
@@ -160,7 +158,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
   if (!iframeHandle) {
     console.error("iFrame not found or the page was closed");
     await page.screenshot({ path: "debug-screenshot.png" });
-    return; // Exit if the iframe is not found
+    return; 
   }
 
   // Smoothly scroll to the iframe before accessing its content
@@ -171,7 +169,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
     }
   }, iframeSelector);
 
-  // Wait a moment for the smooth scrolling to complete
+  
   await page.waitForTimeout(2000);
 
   // Access the iframe's content frame
@@ -196,8 +194,8 @@ test('Check "Detached Structure"', async ({ browser }) => {
     }
   }, noButtonSelector);
 
-  // Wait a bit to ensure the smooth scroll animation completes
-  await page.waitForTimeout(1000); // Adjust timing based on the actual scroll duration
+  
+  await page.waitForTimeout(1000);
 
   // Check if the "NO" button is enabled and ready for interaction after scrolling
   const isNoButtonEnabled = await page.isEnabled(noButtonSelector);
@@ -217,7 +215,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
   await page.waitForLoadState("domcontentloaded");
 
   // Define the selector for the "Gutters" section's custom checkbox wrapper
-  const customCheckboxsWrapperSelector = "div.CustomOptOutWrapper"; // Ensure this is the correct selector for your page
+  const customCheckboxsWrapperSelector = "div.CustomOptOutWrapper"; 
 
   // Wait for the custom checkbox to be visible
   await page.waitForSelector(customCheckboxsWrapperSelector, {
@@ -229,7 +227,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
     const checkbox = document.querySelector(
       selector + " input[type='checkbox']"
     );
-    return checkbox && checkbox.checked; // Returns true if the checkbox exists and is checked
+    return checkbox && checkbox.checked; 
   }, customCheckboxsWrapperSelector);
 
   if (isChecked) {
@@ -266,13 +264,12 @@ test('Check "Detached Structure"', async ({ browser }) => {
   await resetInputToZero(fixedInputSelector);
   await resetInputToZero(solarPoweredInputSelectors);
 
-  // Wait a bit for any potential page logic to process the reset
+  
   await page.waitForTimeout(2000);
 
-  // Wait for any potential page updates after the interaction
-  await page.waitForTimeout(2000); // Adjust the timeout as needed based on your application's behavior
 
-  // Assuming 'frame' is correctly defined and pointing to the desired iframe context
+  await page.waitForTimeout(2000); 
+  
   const shingleColors = [
     "Barkwood",
     "Birchwood",
@@ -297,7 +294,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
     await frame.waitForSelector(shingleLabelSelector, { state: "visible" });
     await frame.click(shingleLabelSelector);
     console.log(`Clicked on ${shingleColor}`);
-    await frame.waitForTimeout(2500); // Allows for observation of changes
+    await frame.waitForTimeout(2500);
 
     // Selector for the 'Selected add-ons' section in the main page context
     const addonsSelector = "p.SelectionSummary_infoSubTitle__1V8ku";
@@ -317,7 +314,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
         `'Selected add-ons' section not found for ${shingleColor} in main page context`
       );
     }
-    await frame.waitForTimeout(2500); // Ensures the page has time to processed
+    await frame.waitForTimeout(2500); 
 
     // Scroll back to the top element (<h3>) using the main page context
     const topSelector = "h3.result_sectionSubtitle__1mAzM";
@@ -336,7 +333,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
         `Top element (h3) not found for ${shingleColor} in main page context`
       );
     }
-    await frame.waitForTimeout(2500); // Wait after scrolling
+    await frame.waitForTimeout(2500); 
   }
 
   // Now, simulate the drag on the visualizer canvas to verify the movement
@@ -377,7 +374,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
 
     // Define a function to perform smooth scrolling
     async function smoothScroll(startX, startY, endX, endY, durationMs) {
-      const steps = 20; // Increase for smoother scrolling
+      const steps = 20;
       const dx = (endX - startX) / steps;
       const dy = (endY - startY) / steps;
       const stepDuration = durationMs / steps;
@@ -499,13 +496,13 @@ test('Check "Detached Structure"', async ({ browser }) => {
   // Optionally, wait for any actions triggered by clicking the "YES" button to complete
   await page.waitForTimeout(2000); // Adjust the timeout based on your application's behavior
 
-  // Define the selector for the target paragraph element
+ 
   const summaryParagraphSelector = ".SelectionSummary_summaryParagragh__8hoZN";
 
   // Now, smoothly scroll to the paragraph element
   const summaryParagraphElement = page.locator(summaryParagraphSelector);
 
-  // Wait for the element to be available in the DOM
+  
   await summaryParagraphElement.waitFor();
 
   // Scroll the element into view smoothly
@@ -522,19 +519,19 @@ test('Check "Detached Structure"', async ({ browser }) => {
 
   // Scroll to a paragraph containing specific text
   await page.evaluate(() => {
-    const paragraphs = [...document.querySelectorAll("p")]; // Get all paragraphs
+    const paragraphs = [...document.querySelectorAll("p")];
     const targetParagraph = paragraphs.find((p) =>
       p.textContent.includes("Included as standard.")
     ); // Find the one that includes the text
     if (targetParagraph) {
-      targetParagraph.scrollIntoView({ behavior: "smooth", block: "center" }); // Smoothly scroll to it
+      targetParagraph.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   });
 
   console.log(
     "Scrolled smoothly to the paragraph containing 'Included as standard.'"
   );
-  await page.waitForTimeout(2000); // Wait for the scrolling to finish
+  await page.waitForTimeout(2000);
 
   // Define the selector for the "Gutters" section's custom checkbox wrapper
   const customCheckboxWrapperSelector = "div.CustomCheckboxWrapper";
@@ -548,8 +545,9 @@ test('Check "Detached Structure"', async ({ browser }) => {
   console.log("Clicking on the custom checkbox in the 'Gutters' section.");
   await page.click(customCheckboxWrapperSelector);
 
-  // Wait for any potential page updates after the click
+
   await page.waitForTimeout(2000);
+
   // Smoothly scroll back down to the summary paragraph
   const summaryParagraphSelectors = ".SelectionSummary_summaryParagragh__8hoZN";
   const summaryParagraphElements = page.locator(summaryParagraphSelectors);
@@ -564,7 +562,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
     smoothScrollToElement(element);
   });
 
-  // Optionally wait for a moment after scrolling
+  
   await page.waitForTimeout(2000);
 
   console.log("Scrolled smoothly down to the summary paragraph successfully.");
@@ -578,7 +576,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
   });
   console.log("Scrolled smoothly up to the 'Gutters' heading successfully.");
 
-  // Wait for the scrolling animation to complete
+  
   await page.waitForTimeout(2000);
 
   // Click on the first custom checkbox within the "Gutters" section
@@ -586,18 +584,18 @@ test('Check "Detached Structure"', async ({ browser }) => {
   await page.click(customCheckboxWrapperSelectors);
   console.log("Clicked on the custom checkbox in the 'Gutters' section.");
 
-  // Wait for any potential page updates after the click
+  
   await page.waitForTimeout(2000);
 
   console.log(
     "Proceeding to verify and interact with the second custom checkbox..."
   );
 
-  const secondCustomCheckboxSelector = "div.CustomCheckboxWrapper"; // Ensure this is correct
+  const secondCustomCheckboxSelector = "div.CustomCheckboxWrapper"; 
   const isSecondCheckboxPresent = await page
     .locator(secondCustomCheckboxSelector)
     .isVisible({ timeout: 5000 })
-    .catch((e) => false); // Adjust the timeout as needed
+    .catch((e) => false); 
 
   if (isSecondCheckboxPresent) {
     console.log("Second custom checkbox is present. Interacting...");
@@ -605,9 +603,9 @@ test('Check "Detached Structure"', async ({ browser }) => {
     console.log("Clicked on the second custom checkbox.");
   } else {
     console.error("Second custom checkbox is not present or visible.");
-    // Handle the absence of the checkbox accordingly, maybe skip or take alternative actions
+    
   }
-  // Wait for any potential page updates after the click
+  
   await page.waitForTimeout(2000);
 
   // Smoothly scroll back down to the summary paragraph
@@ -621,7 +619,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
     "Scrolled smoothly back down to the summary paragraph successfully."
   );
 
-  // Wait for the scrolling animation to complete
+  
   await page.waitForTimeout(2000);
 
   // Define a more generic selector for the "Skylights" heading if possible
@@ -640,8 +638,8 @@ test('Check "Detached Structure"', async ({ browser }) => {
 
   console.log("Scrolled smoothly up to the 'Skylights' heading.");
 
-  // Optionally, wait for the scrolling animation to complete
-  await page.waitForTimeout(2000); // Adjust as necessary
+  
+  await page.waitForTimeout(2000);
 
   // Define a more specific selector to accurately target the input field for "Fixed" option
   const fixedOptionSelector =
@@ -653,23 +651,23 @@ test('Check "Detached Structure"', async ({ browser }) => {
   // Set the value to 0 first to ensure it starts from 0
   await page.fill(fixedOptionSelector, "0");
 
-  // Wait for the input logic to process the reset to 0
-  await page.waitForTimeout(3000); // Adjust the timeout as needed
+  
+  await page.waitForTimeout(3000); 
 
-  // Click on the input to focus
+  
   await page.click(fixedOptionSelector);
 
-  // Increase the value by 1
+  
   await page.fill(fixedOptionSelector, "1");
 
-  // Wait a bit for any potential page logic to process the change
-  await page.waitForTimeout(3000); // Adjust the timeout as needed
+  
+  await page.waitForTimeout(3000); 
 
   // Increase the value to 4 (since you're directly setting the value, it's not adding 3 to the previous but setting to 4 directly)
   await page.fill(fixedOptionSelector, "4");
 
-  // Wait a bit for any potential page logic to process the change
-  await page.waitForTimeout(3000); // Adjust the timeout as needed
+  
+  await page.waitForTimeout(3000); 
 
   console.log(
     "Reset the number input value to 0, then increased first by 1, then set to 4."
@@ -679,20 +677,20 @@ test('Check "Detached Structure"', async ({ browser }) => {
   const solarPoweredInputSelector =
     '.result_skylightOptionTitle__BV1J3:has-text("Solar-Powered Opening") + div > input[type="number"]';
 
-  // Click on the input to focus
+  
   await page.click(solarPoweredInputSelector);
 
-  // Increase the value by 1
+  
   await page.fill(solarPoweredInputSelector, "1");
 
-  // Wait a bit for any potential page logic to process the change
-  await page.waitForTimeout(3000); // Adjust the timeout as needed
+  
+  await page.waitForTimeout(3000); 
 
   // Increase the value by 3, assuming you want to set the total value to 4
   await page.fill(solarPoweredInputSelector, "4");
 
-  // Wait a bit for any potential page logic to process the change
-  await page.waitForTimeout(3000); // Adjust the timeout as needed
+  
+  await page.waitForTimeout(3000); 
 
   console.log(
     "Increased the Solar-Powered Opening input value first by 1, then by 3."
@@ -701,7 +699,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
   // Define the selector for the target div
   const targetDivSelector = "#result_roofingLayers__kOCE6";
 
-  // Wait for the target div to be visible on the page
+  
   await page.waitForSelector(targetDivSelector, { state: "visible" });
 
   // Scroll the target div into view smoothly
@@ -714,7 +712,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
 
   console.log("Scrolled smoothly to the target div.");
 
-  // Wait for 2 seconds after scrolling
+  
   await page.waitForTimeout(2000);
 
   async function clickSequence(page) {
@@ -734,23 +732,21 @@ test('Check "Detached Structure"', async ({ browser }) => {
     ];
 
     for (const interaction of interactions) {
-      // Click on the button to open the section
+      
       await page.click(interaction.selector);
       console.log(`Clicked on section opened by ${interaction.selector}`);
 
-      // Correctly wait for the "X" button to become visible and clickable
-      // Adjust this selector to correctly target the "X" close button in your application
-      const closeButtonSelector = 'a[role="button"]:has-text("X")'; // Example, adjust according to your actual application
+      
+      const closeButtonSelector = 'a[role="button"]:has-text("X")'; 
       await page.waitForSelector(closeButtonSelector, { state: "visible" });
       console.log(`The "X" is now visible.`);
 
-      // Click on the "X" to close the section
+      
       await page.click(closeButtonSelector);
       console.log(`Clicked the "X" to close.`);
 
       await clickSequence(page);
 
-      // Wait for a moment to ensure the section is closed before moving to the next
       await page.waitForTimeout(1000);
     }
 
@@ -781,27 +777,27 @@ test('Check "Detached Structure"', async ({ browser }) => {
       console.log('Smoothly scrolled to the "Previous Month" button.');
     }
 
-    // Call the scrollToPreviousMonthButton function
+    
     await scrollToPreviousMonthButton();
 
-    // Wait for 2 seconds after scrolling
+    
     await page.waitForTimeout(2000);
 
-    // Click on the specific date
+    
     await page.click('abbr[aria-label="March 28, 2024"]');
     console.log("Clicked on March 28, 2024.");
   }
 
-  // Make sure to call this function properly in the async context where 'page' is defined
+  
   await scrollToAndClickDate(page);
 
   await page.waitForTimeout(2000);
 
-  // Ensure the target element is visible before attempting to scroll
+  
   await page.waitForSelector("#result_totalEstimateAmount__rj09i", {
     state: "visible",
   });
-  await page.waitForTimeout(1000); // Optional: Ensure the page has stabilized
+  await page.waitForTimeout(1000);
 
   // Smooth scroll to the first target element
   await page.evaluate(() => {
@@ -813,7 +809,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
     }
   });
 
-  // Wait for 6 seconds to simulate observing the content or a slow scroll
+  
   await page.waitForTimeout(6000);
 
   // Smooth scroll to the second target element
@@ -854,7 +850,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
   // Smooth scroll to <strong>Exclusions:</strong>
   await page.evaluate(() => {
     const skylightsElement = document.evaluate(
-      "//strong[contains(text(), 'Skylights:')]", // Adjust the text as necessary
+      "//strong[contains(text(), 'Skylights:')]", 
       document,
       null,
       XPathResult.FIRST_ORDERED_NODE_TYPE,
@@ -866,14 +862,14 @@ test('Check "Detached Structure"', async ({ browser }) => {
   });
   console.log("Smoothly scrolled to Skylights:");
 
-  await page.waitForTimeout(4000); // Wait for 4 seconds
+  await page.waitForTimeout(4000); 
 
   // Go back to the previous page
   await page.goBack({ waitUntil: "networkidle" });
 
   await page.waitForTimeout(2000);
 
-  // Click on the specific date
+ 
   await page.click('abbr[aria-label="March 28, 2024"]');
   console.log("Clicked on March 28, 2024.");
 
@@ -921,7 +917,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
   });
   console.log("Smoothly scrolled to 'Preferred start date:'");
 
-  // Wait for 4 seconds to stay on the element
+  
   await page.waitForTimeout(4000);
 
   // Smoothly scroll back up to the specific <p> element about payment options
@@ -946,7 +942,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
   );
   console.log("Clicked on the credit card payment option.");
 
-  // Wait for 2 seconds
+  
   await page.waitForTimeout(2000);
 
   // Smoothly scroll to the <div class="checkout_card_body__8MFut">
@@ -971,7 +967,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
   });
   console.log("Smoothly scrolled to the checkout button.");
 
-  // Wait for 2 seconds to observe the smooth scroll
+  
   await page.waitForTimeout(3000);
 
   // Click the checkout button
@@ -985,14 +981,13 @@ test('Check "Detached Structure"', async ({ browser }) => {
     'iframe[src*="https://jstest.authorize.net/v3/acceptMain/acceptMain.html"]'
   );
 
-  // Proceed to interact with the iframe
+  // Interact with the iframe
   const frames = await iframeElementHandles.contentFrame();
 
   if (frame) {
-    // Assuming we're now interacting within the iframe
 
     // Click and type in the card number field
-    await frames.click('input[name="cardNum"]'); // Adjust if necessary for your actual page
+    await frames.click('input[name="cardNum"]'); 
     await frames.type('input[name="cardNum"]', "4242424242424242", {
       delay: 100,
     });
@@ -1014,7 +1009,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
     console.log("Failed to access the iframe content.");
   }
 
-  // Re-acquiring the iframe reference before interacting with the "Submit Payment" button
+  // Getting the iframe reference before interacting with the "Submit Payment" button
   const iframeElementHandle = await page.waitForSelector(
     'iframe[src*="https://jstest.authorize.net"]',
     { state: "attached" }
@@ -1023,7 +1018,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
 
   if (frame) {
     try {
-      // Ensuring the "Submit Payment" button is visible and interactable
+    
       await framess.waitForSelector("button#payButton", {
         state: "visible",
         timeout: 5000,
@@ -1034,11 +1029,11 @@ test('Check "Detached Structure"', async ({ browser }) => {
       console.log("Clicked 'Submit Payment' button.");
     } catch (error) {
       console.error("Error clicking 'Submit Payment':", error);
-      // Here, handle the case where the button couldn't be clicked, possibly by retrying or logging
+      
     }
   } else {
     console.log("The iframe is detached or the frame reference is invalid.");
-    // Consider retrying to obtain the iframe reference or handling the error as appropriate
+
   }
 
   // Remove the event listener after the test
@@ -1047,7 +1042,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
   });
 });
 
-// Export the configuration for Playwright
+
 module.exports = {
-  timeout: 360000, // Global timeout for all actions set to 3 minutes
+  timeout: 360000, 
 };
