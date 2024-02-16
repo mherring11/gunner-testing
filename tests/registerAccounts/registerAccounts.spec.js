@@ -129,7 +129,7 @@ test("Register accounts from sheet data", async ({ page, browser }) => {
       await gmailPage.goto("https://mail.google.com/");
 
       // Fill in the username and password
-      await gmailPage.fill('input[type="email"]', "playwright021324@gmail.com");
+      await gmailPage.fill('input[type="email"]', "playwright021224@gmail.com");
       await gmailPage.click("#identifierNext");
       await gmailPage.waitForNavigation();
       await gmailPage.fill('input[type="password"]', "Playwright24!"); // It's better to use environment variables for passwords

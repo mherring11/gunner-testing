@@ -1,10 +1,9 @@
 const { test, expect } = require("@playwright/test");
 const axios = require("axios");
 
-// Asynchronously fetch data from an API sheet
 async function fetchDataFromSheet() {
+  console.log("Starting to fetch data from sheet...");
   try {
-    // Make an HTTP GET request to the API endpoint
     const response = await axios.get(
       "https://app.apisheet.io/v1/x2OagYQ0/gunner_estimator4",
       {
@@ -14,54 +13,47 @@ async function fetchDataFromSheet() {
       }
     );
     console.log("Data fetched successfully:", response.data);
-    return response.data; // Return the fetched data
+    return response.data;
   } catch (error) {
     console.error("Error fetching data from sheet:", error);
-    return []; // Return an empty array in case of an error
+    return [];
   }
 }
-
-// -----------------PRESS PLAY BUTTON----------------------
 
 test('Check "Your order confirmation" email and click on "Log in to my account"', async ({
   browser,
 }) => {
-  // Create a new browser context and page instance
+  console.log("Starting test to check the order confirmation email...");
   const context = await browser.newContext();
   const page = await context.newPage();
-
-  // Navigate to Gmail and log in
+  console.log("Navigating to Gmail...");
   await page.goto("https://mail.google.com/");
+  console.log("Filling in the email address...");
   await page.fill('input[type="email"]', "playwright021224@gmail.com");
   await page.click('button:has-text("Next")');
-  await page.fill('input[type="password"]', "Playwright24!"); // Consider using environment variables for sensitive information
+  console.log("Entering password...");
+  await page.fill('input[type="password"]', "Playwright24!");
   await page.click('button:has-text("Next")');
-
-  // Wait for the inbox to load
+  console.log(
+    "Logged into Gmail, searching for the order confirmation email..."
+  );
   await page.waitForSelector('input[aria-label="Search mail"]');
-
-  // Search for the email with the specified subject
   await page.fill(
     'input[aria-label="Search mail"]',
     'subject:"Your order confirmation"'
   );
   await page.keyboard.press("Enter");
-
-  // Wait for the search results and click on the email
+  console.log("Opening the order confirmation email...");
   await page.waitForSelector('tr.zA:has-text("Your order confirmation")');
   await page.click('tr.zA:has-text("Your order confirmation")');
-
-  // Wait for the email content container to load
+  console.log("Email opened, scrolling to the bottom...");
   await page.waitForSelector("div.aeJ");
-
-  // Smoothly scroll to the bottom of the email content
   await page.evaluate(() => {
     return new Promise((resolve) => {
       const element = document.querySelector("div.aeJ");
       const totalScroll = element.scrollHeight - element.clientHeight;
-      const step = totalScroll / 60; // Adjust the duration or steps as needed for smoothness
+      const step = totalScroll / 60;
       let scrolled = 0;
-
       const scrollDown = setInterval(() => {
         if (scrolled < totalScroll) {
           element.scrollBy(0, step);
@@ -70,67 +62,45 @@ test('Check "Your order confirmation" email and click on "Log in to my account"'
           clearInterval(scrollDown);
           resolve();
         }
-      }, 100); // Adjust the interval for smoothness
+      }, 100);
     });
   });
-
+  console.log(
+    "Scrolling completed, looking for the 'Log in to my account' button..."
+  );
   await page.waitForSelector('img[alt="Log in to my account"]', {
     state: "visible",
   });
-
-  // Smoothly scroll to the "Log in to my account" image if it's not already in view
-  await page.evaluate(() => {
-    const loginButton = document.querySelector(
-      'img[alt="Log in to my account"]'
-    );
-    if (loginButton) {
-      loginButton.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
-
-  // Wait a bit to ensure the smooth scroll has finished
-  await page.waitForTimeout(6000); // Adjust based on your scroll duration
-
-  // Click the "Log in to my account" button or image
+  console.log("'Log in to my account' button found, attempting to click...");
   await page.click('img[alt="Log in to my account"]');
-
-  // After the email has been processed
-  console.log("Processing complete, proceeding to log into the website.");
-
+  console.log("Clicked on 'Log in to my account', navigating to logout...");
   await page.goto("https://accounts.google.com/Logout", {
     waitUntil: "networkidle",
   });
-
-  // Navigate to the login page
+  console.log("Logged out, navigating to the estimator login page...");
   await page.goto("https://estimatorstg.gunnerroofing.com/login");
-
-  // Wait for the email input to be visible, fill it, and assert it is filled
+  console.log("On login page, filling in credentials...");
   await page.waitForSelector("#mui-1", { state: "visible" });
   await page.fill("#mui-1", "playwright021224@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
-  console.log(`Email Input Value: ${emailValue}`); // Should log the filled email
+  console.log(`Email Input Value confirmed: ${emailValue}`);
+  expect(emailValue).toBe("playwright021224@gmail.com");
 
-  // Wait for the password input to be visible, fill it, and assert it is filled
   await page.waitForSelector("#mui-2", { state: "visible" });
   await page.fill("#mui-2", "123PWtest!");
   const passwordValue = await page.$eval("#mui-2", (el) => el.value);
-  console.log(`Password Input Value: ${passwordValue}`); // Should log the filled password
+  console.log(`Password Input Value confirmed: ${passwordValue}`);
+  expect(passwordValue).toBe("123PWtest!");
 
-  await page.click('button:has-text("SIGN IN")'), // Adjust the selector if necessary
-    // Remove the event listener after the test
-    page.context().removeListener("page", async (newPage) => {
-      await newPage.close();
-    });
-
-  // Log in and wait for page actions to complete
-  console.log("Logged in, waiting for page actions.");
-
-  // Wait for the specific element to be loaded and rendered on the page
+  console.log("Attempting to sign in...");
+  await page.click('button:has-text("SIGN IN")');
+  console.log("Signed in, verifying sign-in and waiting for page actions...");
   await page.waitForSelector(".myAccount_paymentScheduleItem__EZLf8", {
     visible: true,
   });
-
-  // Smoothly scroll to the specified <li> element
+  console.log(
+    "Account page loaded, performing final scroll to payment schedule item..."
+  );
   await page.evaluate(() => {
     const targetElement = document.querySelector(
       ".myAccount_paymentScheduleItem__EZLf8"
@@ -140,9 +110,8 @@ test('Check "Your order confirmation" email and click on "Log in to my account"'
         targetElement.getBoundingClientRect().top + window.scrollY;
       const startPosition = window.scrollY;
       const distance = targetPosition - startPosition;
-      const duration = 1000; // Smooth scroll duration in milliseconds
+      const duration = 1000;
       let startTime = null;
-
       function smoothScroll(currentTime) {
         if (startTime === null) startTime = currentTime;
         const timeElapsed = currentTime - startTime;
@@ -152,29 +121,21 @@ test('Check "Your order confirmation" email and click on "Log in to my account"'
           distance,
           duration
         );
-
         window.scrollTo(0, nextScroll);
         if (timeElapsed < duration) requestAnimationFrame(smoothScroll);
       }
-
       function easeFunction(t, b, c, d) {
         t /= d / 2;
         if (t < 1) return (c / 2) * t * t + b;
         t--;
         return (-c / 2) * (t * (t - 2) - 1) + b;
       }
-
       requestAnimationFrame(smoothScroll);
     }
   });
-
-  // Remove the event listener after the test
-  page.context().removeListener("page", async (newPage) => {
-    await newPage.close();
-  });
+  console.log("Final scroll completed, test execution finished.");
 });
 
-// Export the configuration for Playwright
 module.exports = {
-  timeout: 360000, // Global timeout for all actions set to 3 minutes
+  timeout: 360000,
 };
