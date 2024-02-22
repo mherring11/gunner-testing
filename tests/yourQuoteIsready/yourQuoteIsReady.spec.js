@@ -31,10 +31,10 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
 
   await context.clearCookies();
   await page.goto("https://mail.google.com/");
-  await page.fill('input[type="email"]', "playwright021324@gmail.com");
+  await page.fill('input[type="email"]', "gunnerplaywright@gmail.com");
   await page.click("#identifierNext");
   await page.waitForNavigation();
-  await page.fill('input[type="password"]', "Playwright24!");
+  await page.fill('input[type="password"]', "testtest123!CHL");
   await page.click("#passwordNext");
   await page.waitForNavigation();
 
@@ -88,7 +88,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   await page.goto("https://estimatorstg.gunnerroofing.com/login");
 
   await page.waitForSelector("#mui-1", { state: "visible" });
-  await page.fill("#mui-1", "gunnerplaywright@gmail.com");
+  await page.fill("#mui-1", "gunnerplaywright+022102@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
   console.log(`Email Input Value: ${emailValue}`);
 
@@ -119,7 +119,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   console.log("Logged in, starting color selection verification.");
 
   const iframeSelector =
-    'iframe[src*="https://visualizer.gunnerroofing.com/8e4de528-e671-4c4c-9e36-44e782a43e2f/"]';
+    'iframe[src*="https://visualizer.gunnerroofing.com/b3144db3-28f9-456a-939e-4c0640df3a61/"]';
   const iframeHandle = await page.waitForSelector(iframeSelector, {
     state: "attached",
     timeout: 20000,

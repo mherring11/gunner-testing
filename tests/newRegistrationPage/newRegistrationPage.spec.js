@@ -104,12 +104,19 @@ async function registerUser(page, user) {
 
 test("bulk registration with API data", async ({ page }) => {
   const users = await fetchDataFromSheet();
-
+  
   if (users.length > 0) {
-    for (const user of users) {
-      await registerUser(page, user);
-
-      await page.goto("https://staging.gunnerroofing.com/register/");
+    for (let i = 0; i < users.length; i++) {
+      await registerUser(page, users[i]);
+      // Check if the current user is not the last one before navigating back
+      if (i < users.length - 1) {
+        console.log("Navigating back to the registration page for the next user...");
+        await page.goto("https://staging.gunnerroofing.com/register/");
+      } else {
+        console.log("Staying on the 'Thank You' page for the last user.");
+        // Optionally wait on the 'Thank You' page
+        await page.waitForTimeout(2000);
+      }
     }
     console.log("All users registered successfully.");
   } else {

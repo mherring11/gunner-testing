@@ -39,7 +39,7 @@ test('Check "Flat Roof add-on"', async ({ browser }) => {
 
   // Wait for the email input to be visible, fill it, and assert it is filled
   await page.waitForSelector("#mui-1", { state: "visible" });
-  await page.fill("#mui-1", "impactsabootcamp@gmail.com");
+  await page.fill("#mui-1", "playwright021224+16@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
   console.log(`Email Input Value: ${emailValue}`); // Should log the filled email
 
@@ -80,7 +80,7 @@ test('Check "Flat Roof add-on"', async ({ browser }) => {
 
   // Wait for the iframe to be loaded and get its handle
   const iframeSelector =
-    'iframe[src*="https://visualizer.gunnerroofing.com/97f620f2-c48d-4a21-b17e-52c7fac40ff2/"]';
+    'iframe[src*="https://visualizer.gunnerroofing.com/ed47f80f-a15d-4ddd-8ce3-cfcc0486c051/"]';
   const iframeHandle = await page.waitForSelector(iframeSelector, {
     state: "attached",
     timeout: 20000,

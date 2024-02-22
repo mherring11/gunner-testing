@@ -29,10 +29,10 @@ test('Check "Your order confirmation" email and click on "Log in to my account"'
   console.log("Navigating to Gmail...");
   await page.goto("https://mail.google.com/");
   console.log("Filling in the email address...");
-  await page.fill('input[type="email"]', "playwright021224@gmail.com");
+  await page.fill('input[type="email"]', "gunnerplaywright@gmail.com");
   await page.click('button:has-text("Next")');
   console.log("Entering password...");
-  await page.fill('input[type="password"]', "Playwright24!");
+  await page.fill('input[type="password"]', "testtest123!CHL");
   await page.click('button:has-text("Next")');
   console.log(
     "Logged into Gmail, searching for the order confirmation email..."
@@ -81,10 +81,10 @@ test('Check "Your order confirmation" email and click on "Log in to my account"'
   await page.goto("https://estimatorstg.gunnerroofing.com/login");
   console.log("On login page, filling in credentials...");
   await page.waitForSelector("#mui-1", { state: "visible" });
-  await page.fill("#mui-1", "playwright021224@gmail.com");
+  await page.fill("#mui-1", "gunnerplaywright+022102@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
   console.log(`Email Input Value confirmed: ${emailValue}`);
-  expect(emailValue).toBe("playwright021224@gmail.com");
+  expect(emailValue).toBe("gunnerplaywright+022102@gmail.com");
 
   await page.waitForSelector("#mui-2", { state: "visible" });
   await page.fill("#mui-2", "123PWtest!");
@@ -98,9 +98,7 @@ test('Check "Your order confirmation" email and click on "Log in to my account"'
   await page.waitForSelector(".myAccount_paymentScheduleItem__EZLf8", {
     visible: true,
   });
-  console.log(
-    "Account page loaded, performing final scroll to payment schedule item..."
-  );
+  console.log("Account page loaded, scrolling to bottom of page...");
   await page.evaluate(() => {
     const targetElement = document.querySelector(
       ".myAccount_paymentScheduleItem__EZLf8"
@@ -133,7 +131,31 @@ test('Check "Your order confirmation" email and click on "Log in to my account"'
       requestAnimationFrame(smoothScroll);
     }
   });
-  console.log("Final scroll completed, test execution finished.");
+  console.log("Scrolled to bottom");
+
+  await page.waitForTimeout(2000);
+
+  console.log("Scrolling back up to 'Sign Contract' button...");
+
+  await page.evaluate(() => {
+    const signContractButton = Array.from(
+      document.querySelectorAll("button")
+    ).find((button) => button.textContent === "Sign Contract");
+    if (signContractButton) {
+      signContractButton.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  });
+
+  console.log("Scroll to 'Sign Contract' button completed.");
+
+  console.log("Attempting to click 'Sign Contract' button...");
+
+  await page.click('button:has-text("Sign Contract")');
+
+  console.log("'Sign Contract' button clicked.");
 });
 
 module.exports = {

@@ -17,7 +17,7 @@ async function fetchDataFromSheet() {
   }
 }
 
-test('Check "Detached Structure"', async ({ browser }) => {
+test('Check "Regular Home"', async ({ browser }) => {
   test.setTimeout(360000);
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -88,9 +88,9 @@ test('Check "Detached Structure"', async ({ browser }) => {
   console.log("Navigated to estimator login page.");
 
   await page.waitForSelector("#mui-1", { state: "visible" });
-  await page.fill("#mui-1", "gunnerplaywright+022102@gmail.com");
+  await page.fill("#mui-1", "gunnerplaywright+0220241@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
-  expect(emailValue).toEqual("gunnerplaywright+022102@gmail.com");
+  expect(emailValue).toEqual("gunnerplaywright+0220241@gmail.com");
   console.log(`Email Input Value confirmed: ${emailValue}`);
 
   await page.waitForSelector("#mui-2", { state: "visible" });
@@ -126,7 +126,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
 
   console.log("Waiting for the iframe to be loaded.");
   const iframeSelector =
-    'iframe[src*="https://visualizer.gunnerroofing.com/fa337822-e527-43f8-98fa-8ed8b087d5d6/"]';
+    'iframe[src*="https://visualizer.gunnerroofing.com/1f4a0234-4138-4052-8312-724f3550a3c8/"]';
   const iframeHandle = await page.waitForSelector(iframeSelector, {
     state: "attached",
     timeout: 20000,
@@ -153,31 +153,6 @@ test('Check "Detached Structure"', async ({ browser }) => {
     console.error("Failed to retrieve content frame from iframe.");
     return;
   }
-
-  console.log("Preparing to click the 'NO' button.");
-  const noButtonSelector =
-    'button.MuiButtonBase-root.MuiToggleButton-root[value="NO"]';
-  await page.waitForSelector(noButtonSelector, { state: "visible" });
-  await page.evaluate((selector) => {
-    const button = document.querySelector(selector);
-    if (button) {
-      button.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, noButtonSelector);
-
-  await page.waitForTimeout(1000);
-
-  const isNoButtonEnabled = await page.isEnabled(noButtonSelector);
-  if (!isNoButtonEnabled) {
-    console.error("The 'NO' button is not enabled.");
-    throw new Error("The 'NO' button is not enabled or interactable.");
-  }
-
-  console.log("Clicking the 'NO' button.");
-  await page.click(noButtonSelector);
-
-  await page.waitForTimeout(1000);
-  console.log("Proceeding after clicking the 'NO' button.");
 
   console.log("Checking for the 'Gutters' section's custom checkbox wrapper.");
   const customCheckboxsWrapperSelector = "div.CustomOptOutWrapper";
@@ -322,70 +297,6 @@ test('Check "Detached Structure"', async ({ browser }) => {
 
   await page.waitForTimeout(2000);
   console.log("Delay after completing visualizer interaction verification.");
-
-  const questionSelector =
-    'text="Would you like us to include replacement of the roof of the additional structures at this time?"';
-  const questionElement = page.locator(questionSelector);
-  await questionElement.waitFor();
-  await questionElement.evaluate((element) => {
-    const smoothScrollToElement = (el) => {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    };
-    smoothScrollToElement(element);
-  });
-  console.log(
-    "Scrolled smoothly to the specific question paragraph successfully."
-  );
-  await page.waitForTimeout(2000);
-
-  const noteSelector =
-    'text="Note: You will receive a confirmation email once you have completed your payment."';
-  const noteElement = page.locator(noteSelector);
-  await noteElement.waitFor();
-  await noteElement.evaluate((element) => {
-    const smoothScrollToElement = (el) => {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    };
-    smoothScrollToElement(element);
-  });
-  console.log("Scrolled smoothly to the note paragraph successfully.");
-  await page.waitForTimeout(2000);
-
-  const additionalStructuresSelector = 'h3:text("Additional structures")';
-  const additionalStructuresElement = page.locator(
-    additionalStructuresSelector
-  );
-  await additionalStructuresElement.waitFor();
-  await additionalStructuresElement.evaluate((element) => {
-    const smoothScrollToElement = (el) => {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    };
-    smoothScrollToElement(element);
-  });
-  console.log(
-    "Scrolled smoothly to the 'Additional structures' <h3> element successfully."
-  );
-  await page.waitForTimeout(2000);
-
-  const yesButtonSelector =
-    'button.MuiButtonBase-root.MuiToggleButton-root[value="YES"]';
-  await page.waitForSelector(yesButtonSelector, { state: "visible" });
-  await expect(page.locator(yesButtonSelector)).toBeEnabled();
-  await page.click(yesButtonSelector);
-  console.log("Clicked on the 'YES' button.");
-  await page.waitForTimeout(2000);
-
-  const summaryParagraphSelector = ".SelectionSummary_summaryParagragh__8hoZN";
-  const summaryParagraphElement = page.locator(summaryParagraphSelector);
-  await summaryParagraphElement.waitFor();
-  await summaryParagraphElement.evaluate((element) => {
-    const smoothScrollToElement = (el) => {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    };
-    smoothScrollToElement(element);
-  });
-  console.log("Scrolled smoothly down to the summary paragraph successfully.");
-  await page.waitForTimeout(2000);
 
   await page.evaluate(() => {
     const paragraphs = [...document.querySelectorAll("p")];
@@ -683,9 +594,7 @@ test('Check "Detached Structure"', async ({ browser }) => {
     });
     await frames.type("input#expiryDate", "0627", { delay: 100 });
     await frames.type('input[name="firstName"]', "Playwright", { delay: 100 });
-    await frames.type('input[name="lastName"]', "Tester022102", {
-      delay: 100,
-    });
+    await frames.type('input[name="lastName"]', "Tester022024", { delay: 100 });
     await frames.type('input[name="zip"]', "75225", { delay: 100 });
     console.log("Filled out the fields with simulated typing.");
   } else {
