@@ -19,7 +19,7 @@ async function fetchDataFromSheet() {
   }
 }
 
-test('Check "Your quote is ready!" email and login', async ({ browser }) => {
+test('Check "Full Test No Awaits', async ({ browser }) => {
   test.setTimeout(480000);
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -48,33 +48,33 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   await page.press('input[aria-label="Search mail"]', "Enter");
   await page.click('tr.zA:has-text("Your quote is ready!")');
 
-  await page.waitForSelector("div.aeJ");
-  await page.evaluate(() => {
-    return new Promise((resolve) => {
-      const element = document.querySelector("div.aeJ");
-      const totalScroll = element.scrollHeight - element.clientHeight;
-      const step = totalScroll / 40;
-      let scrolled = 0;
+  // await page.waitForSelector("div.aeJ");
+  // await page.evaluate(() => {
+  //   return new Promise((resolve) => {
+  //     const element = document.querySelector("div.aeJ");
+  //     const totalScroll = element.scrollHeight - element.clientHeight;
+  //     const step = totalScroll / 40;
+  //     let scrolled = 0;
 
-      const scrollDown = setInterval(() => {
-        if (scrolled < totalScroll) {
-          element.scrollBy(0, step);
-          scrolled += step;
-        } else {
-          clearInterval(scrollDown);
-          const scrollUp = setInterval(() => {
-            if (scrolled > 0) {
-              element.scrollBy(0, -step);
-              scrolled -= step;
-            } else {
-              clearInterval(scrollUp);
-              resolve();
-            }
-          }, 100);
-        }
-      }, 100);
-    });
-  });
+  //     const scrollDown = setInterval(() => {
+  //       if (scrolled < totalScroll) {
+  //         element.scrollBy(0, step);
+  //         scrolled += step;
+  //       } else {
+  //         clearInterval(scrollDown);
+  //         const scrollUp = setInterval(() => {
+  //           if (scrolled > 0) {
+  //             element.scrollBy(0, -step);
+  //             scrolled -= step;
+  //           } else {
+  //             clearInterval(scrollUp);
+  //             resolve();
+  //           }
+  //         }, 100);
+  //       }
+  //     }, 100);
+  //   });
+  // });
 
   await page.waitForSelector('img[alt="Your Online Quote"]', {
     state: "visible",
@@ -88,7 +88,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   await page.goto("https://estimatorstg.gunnerroofing.com/login");
 
   await page.waitForSelector("#mui-1", { state: "visible" });
-  await page.fill("#mui-1", "gunnerplaywright+02261@gmail.com");
+  await page.fill("#mui-1", "gunnerplaywright+02263@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
   console.log(`Email Input Value: ${emailValue}`);
 
@@ -109,17 +109,17 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   );
   await hangingIconsContainer.scrollIntoViewIfNeeded();
 
-  await page.waitForTimeout(3000);
+  // await page.waitForTimeout(3000);
   await page.evaluate(() => {
     const element = document.querySelector(".result_sectionSubtitle__1mAzM");
     element.scrollIntoView({ behavior: "smooth" });
   });
 
-  await page.waitForTimeout(3000);
+  // await page.waitForTimeout(3000);
   console.log("Logged in, starting color selection verification.");
 
   const iframeSelector =
-    'iframe[src*="https://visualizer.gunnerroofing.com/2838ea9a-f8bf-415d-9a2d-472a5d59fc56/"]';
+    'iframe[src*="https://visualizer.gunnerroofing.com/5372338c-01e0-42ac-9638-1d1a82421e23/"]';
   const iframeHandle = await page.waitForSelector(iframeSelector, {
     state: "attached",
     timeout: 20000,
@@ -147,7 +147,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     await frame.waitForSelector(shingleLabelSelector, { state: "visible" });
     await frame.click(shingleLabelSelector);
     console.log(`Clicked on ${shingleColor}`);
-    await frame.waitForTimeout(2500);
+    // await frame.waitForTimeout(2500);
 
     const addonsSelector = "p.SelectionSummary_infoSubTitle__1V8ku";
     if (await page.$(addonsSelector)) {
@@ -165,7 +165,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         `'Selected add-ons' section not found for ${shingleColor} in main page context`
       );
     }
-    await frame.waitForTimeout(2500);
+    // await frame.waitForTimeout(2500);
 
     const topSelector = "h3.result_sectionSubtitle__1mAzM";
     if (await page.$(topSelector)) {
@@ -183,7 +183,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         `Top element (h3) not found for ${shingleColor} in main page context`
       );
     }
-    await frame.waitForTimeout(2500);
+    // await frame.waitForTimeout(2500);
   }
 
   console.log("Starting visualizer interaction verification.");
@@ -218,17 +218,17 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     }
     await page.mouse.move(pageX, pageY);
     await page.mouse.down();
-    await smoothScroll(pageX, pageY, pageX + 100, pageY, 2000);
-    await smoothScroll(pageX + 100, pageY, pageX + 100, pageY + 100, 2000);
-    await smoothScroll(pageX + 100, pageY + 100, pageX, pageY + 100, 2000);
-    await smoothScroll(pageX, pageY + 100, pageX, pageY, 2000);
+    await smoothScroll(pageX, pageY, pageX + 100, pageY, 500);
+    await smoothScroll(pageX + 100, pageY, pageX + 100, pageY + 100, 500);
+    await smoothScroll(pageX + 100, pageY + 100, pageX, pageY + 100, 500);
+    await smoothScroll(pageX, pageY + 100, pageX, pageY, 500);
     await page.mouse.up();
     console.log("Completed visualizer interaction verification.");
   } catch (error) {
     console.error("Error during visualizer interaction verification:", error);
   }
 
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
   console.log("Delay after completing visualizer interaction verification.");
 
   const questionSelector =
@@ -244,7 +244,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   console.log(
     "Scrolled smoothly to the specific question paragraph successfully."
   );
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   const noteSelector =
     'text="Note: You will receive a confirmation email once you have completed your payment."';
@@ -257,7 +257,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     smoothScrollToElement(element);
   });
   console.log("Scrolled smoothly to the note paragraph successfully.");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   const additionalStructuresSelector = 'h3:text("Additional structures")';
   const additionalStructuresElement = page.locator(
@@ -273,7 +273,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   console.log(
     "Scrolled smoothly to the 'Additional structures' <h3> element successfully."
   );
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   const yesButtonSelector =
     'button.MuiButtonBase-root.MuiToggleButton-root[value="YES"]';
@@ -281,7 +281,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   await expect(page.locator(yesButtonSelector)).toBeEnabled();
   await page.click(yesButtonSelector);
   console.log("Clicked on the 'YES' button.");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   const summaryParagraphSelector = ".SelectionSummary_summaryParagragh__8hoZN";
   const summaryParagraphElement = page.locator(summaryParagraphSelector);
@@ -293,7 +293,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     smoothScrollToElement(element);
   });
   console.log("Scrolled smoothly down to the summary paragraph successfully.");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   await page.evaluate(() => {
     const paragraphs = [...document.querySelectorAll("p")];
@@ -307,7 +307,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   console.log(
     "Scrolled smoothly to the paragraph containing 'Included as standard.'"
   );
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   const customCheckboxWrapperSelector = "div.CustomOptOutWrapper";
   await page.waitForSelector(customCheckboxWrapperSelector, {
@@ -316,7 +316,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   console.log("Waiting for custom checkbox to become visible.");
   await page.click(customCheckboxWrapperSelector);
   console.log("Clicked on the custom checkbox in the 'Gutters' section.");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   const summaryParagraphSelectors = ".SelectionSummary_summaryParagragh__8hoZN";
   const summaryParagraphElements = page.locator(summaryParagraphSelectors);
@@ -326,7 +326,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     element.scrollIntoView({ behavior: "smooth", block: "center" });
   });
   console.log("Scrolled smoothly down to the summary paragraph successfully.");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   const guttersHeadingSelectors = "h3:text('Gutters')";
   const guttersHeadingElements = page.locator(guttersHeadingSelectors);
@@ -336,14 +336,14 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     element.scrollIntoView({ behavior: "smooth", block: "center" });
   });
   console.log("Scrolled smoothly up to the 'Gutters' heading successfully.");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   const customCheckboxWrapperSelectors = "div.CustomOptOutWrapper";
   await page.click(customCheckboxWrapperSelectors);
   console.log(
     "Clicked on the first custom checkbox within the 'Gutters' section."
   );
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   console.log(
     "Proceeding to verify and interact with the second custom checkbox..."
@@ -360,7 +360,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   } else {
     console.error("Second custom checkbox is not present or visible.");
   }
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   const summaryParagraphsSelector = ".SelectionSummary_summaryParagragh__8hoZN";
   const summaryParagraphsElement = page.locator(summaryParagraphsSelector);
@@ -372,7 +372,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   console.log(
     "Scrolled smoothly back down to the summary paragraph successfully."
   );
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   console.log("Scrolling smoothly up to the 'Skylights' heading.");
   await page.evaluate((text) => {
@@ -385,7 +385,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     }
   }, "Skylights");
   console.log("Scrolled smoothly up to the 'Skylights' heading.");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   const fixedOptionSelector =
     'div.result_backSectionContent__2N1Hn div.result_inlineContent__WAHUf:has-text("Fixed") input[type="number"]';
@@ -394,24 +394,24 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   await page.fill(fixedOptionSelector, "0");
   await page.click(fixedOptionSelector);
   await page.fill(fixedOptionSelector, "1");
-  await page.waitForTimeout(3000);
+  // await page.waitForTimeout(3000);
   await page.fill(fixedOptionSelector, "4");
   console.log(
     "Reset the number input value to 0, then increased first by 1, then set to 4."
   );
-  await page.waitForTimeout(3000);
+  // await page.waitForTimeout(3000);
 
   const solarPoweredInputSelector =
     '.result_skylightOptionTitle__BV1J3:has-text("Solar-Powered Opening") + div > input[type="number"]';
   await page.click(solarPoweredInputSelector);
   console.log("Clicked on Solar-Powered Opening input.");
   await page.fill(solarPoweredInputSelector, "1");
-  await page.waitForTimeout(3000);
+  // await page.waitForTimeout(3000);
   await page.fill(solarPoweredInputSelector, "4");
   console.log(
     "Increased the Solar-Powered Opening input value first by 1, then by 3."
   );
-  await page.waitForTimeout(3000);
+  // await page.waitForTimeout(3000);
 
   const targetDivSelector = "#result_roofingLayers__kOCE6";
   await page.waitForSelector(targetDivSelector, { state: "visible" });
@@ -420,7 +420,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     element.scrollIntoView({ behavior: "smooth", block: "center" });
   }, targetDivSelector);
   console.log("Scrolled smoothly to the target div.");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   async function scrollToAndClickDate(page) {
     async function scrollToPreviousMonthButton() {
@@ -439,21 +439,21 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
       console.log('Smoothly scrolled to the "Previous Month" button.');
     }
     await scrollToPreviousMonthButton();
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(2000);
     console.log("Clicking on the 'Next Month' button...");
     await page.click('button[aria-label="Next Month"]');
     console.log("Clicked on the 'Next Month' button.");
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(2000);
     await page.click('abbr[aria-label="April 30, 2024"]');
     console.log("Clicked on April 30, 2024.");
   }
 
   await scrollToAndClickDate(page);
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
   await page.waitForSelector("#result_totalEstimateAmount__rj09i", {
     state: "visible",
   });
-  await page.waitForTimeout(1000);
+  // await page.waitForTimeout(1000);
 
   await page.evaluate(() => {
     const scrollToElement = document.querySelector(
@@ -461,7 +461,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     );
     scrollToElement.scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  await page.waitForTimeout(6000);
+  // await page.waitForTimeout(6000);
 
   await page.evaluate(() => {
     const scrollToElement = document.querySelector(
@@ -469,7 +469,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     );
     scrollToElement.scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  await page.waitForTimeout(4000);
+  // await page.waitForTimeout(4000);
 
   const href = await page.evaluate(() => {
     const link = document.evaluate(
@@ -487,7 +487,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   } else {
     console.log("Link with 'See full description of work' text not found.");
   }
-  await page.waitForTimeout(4000);
+  // await page.waitForTimeout(4000);
 
   await page.evaluate(() => {
     const skylightsElement = document.evaluate(
@@ -497,12 +497,13 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
       XPathResult.FIRST_ORDERED_NODE_TYPE,
       null
     ).singleNodeValue;
-    skylightsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    skylightsElement.scrollIntoView();
   });
+
   console.log("Smoothly scrolled to Skylights:");
-  await page.waitForTimeout(4000);
+  // await page.waitForTimeout(4000);
   await page.goBack({ waitUntil: "networkidle" });
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
   console.log("Clicking on the 'Next Month' button...");
   await page.click('button[aria-label="Next Month"]');
   console.log("Clicked on the 'Next Month' button.");
@@ -519,29 +520,28 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
       XPathResult.FIRST_ORDERED_NODE_TYPE,
       null
     ).singleNodeValue;
-    button.scrollIntoView({ behavior: "smooth", block: "center" });
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    button?.click();
+    if (button) {
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 3 seconds
+      button.click();
+    }
   });
-  console.log(
-    "Clicked 'CHECKOUT & MEET YOUR TEAM' button after smooth scrolling and waiting."
-  );
+  console.log("Clicked 'CHECKOUT & MEET YOUR TEAM' button without scrolling.");
+
   await page.waitForSelector(".SelectionSummary_infoSubTitle__1V8ku", {
     state: "visible",
   });
 
-  await page.evaluate(() => {
-    const pElements = document.querySelectorAll(
-      ".SelectionSummary_infoSubTitle__1V8ku"
-    );
-    const targetElement = Array.from(pElements).find((p) =>
-      p.textContent.includes("Preferred start date:")
-    );
-    targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+  await page.waitForSelector(".SelectionSummary_infoSubTitle__1V8ku", {
+    state: "visible",
   });
-  console.log("Smoothly scrolled to 'Preferred start date:'");
 
-  await page.waitForTimeout(4000);
+  await page.click(".SelectionSummary_infoSubTitle__1V8ku");
+
+  console.log(
+    "Clicked on the element related to 'Preferred start date:' without scrolling."
+  );
+
+  // await page.waitForTimeout(4000);
   await page.evaluate(() => {
     const pElements = Array.from(document.querySelectorAll("p"));
     const targetElement = pElements.find((p) =>
@@ -554,13 +554,13 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     }
   });
   console.log("Smoothly scrolled back to the payment options.");
-  await page.waitForTimeout(3000);
+  // await page.waitForTimeout(3000);
 
   await page.click(
     'input.PrivateSwitchBase-input.css-1m9pwf3[name="paymentOption"][type="radio"][value="creditcard"]'
   );
   console.log("Clicked on the credit card payment option.");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   await page.evaluate(() => {
     const div = document.querySelector("div.checkout_card_body__8MFut");
@@ -569,7 +569,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     }
   });
   console.log("Smoothly scrolled to the checkout card body.");
-  await page.waitForTimeout(3000);
+  // await page.waitForTimeout(3000);
 
   await page.evaluate(() => {
     const button = document.querySelector(
@@ -580,7 +580,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     }
   });
   console.log("Smoothly scrolled to the checkout button.");
-  await page.waitForTimeout(3000);
+  // await page.waitForTimeout(3000);
 
   await page.click(
     "button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.css-1hw9j7s"
@@ -593,16 +593,16 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   const frames = await iframeElementHandles.contentFrame();
   if (frame) {
     await frames.click('input[name="cardNum"]');
-    await frames.type('input[name="cardNum"]', "4242424242424242", {
+    await frames.fill('input[name="cardNum"]', "4242424242424242", {
       delay: 100,
     });
     await frames.type("input#expiryDate", "0627", { delay: 100 });
-    await frames.type('input[name="firstName"]', "Playwright", { delay: 100 });
-    await frames.type('input[name="lastName"]', "Tester022304", {
+    await frames.fill('input[name="firstName"]', "Playwright", { delay: 100 });
+    await frames.fill('input[name="lastName"]', "Tester022304", {
       delay: 100,
     });
-    await frames.type('input[name="zip"]', "75225", { delay: 100 });
-    console.log("Filled out the fields with simulated typing.");
+    await frames.fill('input[name="zip"]', "75225", { delay: 100 });
+    console.log("Filled out the fields.");
   } else {
     console.log("Failed to access the iframe content.");
   }
@@ -636,10 +636,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
 
   console.log("Visible check passed for 'Sign Contract' button.");
 
-  // Use Promise.all to wait for both the click action and the expected network response.
   await Promise.all([
-    // Wait for the network response from DocuSign that indicates the page has started loading.
-    // Adjust the response condition as necessary for your application's behavior.
     page.waitForResponse(
       (response) =>
         response.url().includes("na4.docusign.net") &&
@@ -647,7 +644,6 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
       { timeout: 60000 }
     ),
 
-    // Perform the click action on the "Sign Contract" button.
     page.click("#quoteConfirmation_resultBtn__OshVM a.MuiButtonBase-root"),
   ]);
 
@@ -655,10 +651,6 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     "Clicked on the 'Sign Contract' button and waiting for DocuSign page."
   );
 
-  // Since we're using waitForResponse to detect navigation, we might not need another waitForNavigation call here.
-  // However, if you have additional actions that depend on the full load of the DocuSign page, you can add them below.
-  // For example, checking for a specific element on the DocuSign page to ensure it has loaded.
-  // Ensure the page is fully loaded or a specific element is available before proceeding with further actions.
   console.log("DocuSign page loaded.");
 
   console.log(
@@ -672,14 +664,14 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     "Checkbox for electronic records and signatures agreement clicked."
   );
 
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   console.log("Attempting to click the 'Continue' button...");
   await page.waitForSelector("#action-bar-btn-continue", { state: "visible" });
   await page.click("#action-bar-btn-continue");
   console.log("'Continue' button clicked.");
 
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   console.log("Attempting to click on the 'Start' button...");
 
@@ -693,8 +685,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     console.error("Error clicking the 'Start' button:", error.message);
   }
 
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   console.log("Attempting to click on the 'Sign' div...");
   await page.waitForSelector('div.signature-tab-content:has-text("Sign")', {
@@ -703,8 +694,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   await page.click('div.signature-tab-content:has-text("Sign")');
   console.log("'Sign' div clicked successfully.");
 
-  console.log("Waiting for 2 seconds before scrolling...");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   console.log("Attempting to click on the 'Adopt and Sign' button...");
 
@@ -715,11 +705,9 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
 
   console.log("'Adopt and Sign' button clicked successfully.");
 
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
-  // ----------SCROLL BACK UP TO FIRST TEST DOCUMENT----------
-
-  console.log("Scrolling back up to the specified 'Test Document' div...");
+  console.log("Navigating to the specified 'Test Document' div...");
   await page.evaluate(() => {
     const pageInfoElements = Array.from(
       document.querySelectorAll("div.page-info")
@@ -730,16 +718,13 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         el.querySelector(".page-info-xofx").innerText.includes("2 of 11")
     );
     if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+      targetDiv.scrollIntoView({ behavior: "auto", block: "center" });
     } else {
       console.error("Specified 'Test Document' div not found.");
     }
   });
 
-  // ----------CLICK ON FIRST AND SECOND INTIALS----------
-
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   console.log("Clicking on the 'Initial' div...");
   await page.waitForSelector('text="Initial"', {
@@ -756,8 +741,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   });
   await page.click('text="Initial"');
 
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   console.log("Clicking on the next 'Initial' div...");
   const initialDivs = await page.$$(
@@ -771,10 +755,9 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     console.error("Not enough 'Initial' divs found.");
   }
 
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
-  console.log("Scrolling to 'Test Document 4 of 11'...");
+  console.log("Checking for 'Test Document 4 of 11'...");
   await page.evaluate(() => {
     const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
     const targetDiv = pageInfoDivs.find(
@@ -783,16 +766,15 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         div.textContent.includes("4 of 11")
     );
     if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+      console.log("'Test Document 4 of 11' found.");
     } else {
       console.error("'Test Document 4 of 11' not found.");
     }
   });
 
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
-  console.log("Scrolling to 'Test Document 5 of 11'...");
+  console.log("Checking for 'Test Document 5 of 11'...");
   await page.evaluate(() => {
     const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
     const targetDiv = pageInfoDivs.find(
@@ -801,18 +783,13 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         div.textContent.includes("5 of 11")
     );
     if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+      console.log("'Test Document 5 of 11' found.");
     } else {
       console.error("'Test Document 5 of 11' not found.");
     }
   });
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 6 of 11'..."
-  );
-  await page.waitForTimeout(2000);
-
-  console.log("Scrolling to 'Test Document 6 of 11'...");
+  console.log("Checking for 'Test Document 6 of 11'...");
   await page.evaluate(() => {
     const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
     const targetDiv = pageInfoDivs.find(
@@ -821,18 +798,13 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         div.textContent.includes("6 of 11")
     );
     if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+      console.log("'Test Document 6 of 11' found.");
     } else {
       console.error("'Test Document 6 of 11' not found.");
     }
   });
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 7 of 11'..."
-  );
-  await page.waitForTimeout(2000);
-
-  console.log("Scrolling to 'Test Document 7 of 11'...");
+  console.log("Checking for 'Test Document 7 of 11'...");
   await page.evaluate(() => {
     const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
     const targetDiv = pageInfoDivs.find(
@@ -841,18 +813,15 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         div.textContent.includes("7 of 11")
     );
     if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+      console.log("'Test Document 7 of 11' found.");
     } else {
       console.error("'Test Document 7 of 11' not found.");
     }
   });
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 8 of 11'..."
-  );
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
-  console.log("Scrolling to 'Test Document 8 of 11'...");
+  console.log("Checking for 'Test Document 8 of 11'...");
   await page.evaluate(() => {
     const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
     const targetDiv = pageInfoDivs.find(
@@ -861,18 +830,15 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         div.textContent.includes("8 of 11")
     );
     if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+      console.log("'Test Document 8 of 11' found.");
     } else {
       console.error("'Test Document 8 of 11' not found.");
     }
   });
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 9 of 11'..."
-  );
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
-  console.log("Scrolling to 'Test Document 9 of 11'...");
+  console.log("Checking for 'Test Document 9 of 11'...");
   await page.evaluate(() => {
     const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
     const targetDiv = pageInfoDivs.find(
@@ -881,18 +847,15 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         div.textContent.includes("9 of 11")
     );
     if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+      console.log("'Test Document 9 of 11' found.");
     } else {
       console.error("'Test Document 9 of 11' not found.");
     }
   });
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 10 of 11'..."
-  );
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
-  console.log("Scrolling to 'Test Document 10 of 11'...");
+  console.log("Checking for 'Test Document 10 of 11'...");
   await page.evaluate(() => {
     const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
     const targetDiv = pageInfoDivs.find(
@@ -901,18 +864,15 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         div.textContent.includes("10 of 11")
     );
     if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+      console.log("'Test Document 10 of 11' found.");
     } else {
       console.error("'Test Document 10 of 11' not found.");
     }
   });
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 11 of 11'..."
-  );
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
-  console.log("Scrolling to 'Test Document 11 of 11'...");
+  console.log("Checking for 'Test Document 11 of 11'...");
   await page.evaluate(() => {
     const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
     const targetDiv = pageInfoDivs.find(
@@ -921,13 +881,13 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
         div.textContent.includes("11 of 11")
     );
     if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+      console.log("'Test Document 11 of 11' found.");
     } else {
       console.error("'Test Document 11 of 11' not found.");
     }
   });
 
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(2000);
 
   console.log("Clicking on the 'Finish' button...");
   await page.click(
@@ -938,146 +898,103 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   await page.waitForTimeout(3000);
 
   console.log("Attempting to click on the 'My Account' button...");
-
   const myAccountButtonSelector = 'a:has-text("My Account")';
   await page.waitForSelector(myAccountButtonSelector, { state: "visible" });
   await page.click(myAccountButtonSelector);
-
   console.log("'My Account' button clicked successfully.");
 
   await page.waitForTimeout(3000);
 
-  console.log("Scrolling to 'credit' table header...");
+  console.log("Ensuring 'credit' table header is present...");
   await page.waitForSelector('th:has-text("credit")', {
     state: "visible",
   });
-  await page.evaluate(() => {
-    const creditTh = Array.from(document.querySelectorAll("th")).find(
-      (th) => th.textContent.trim() === "credit"
-    );
-    if (creditTh) {
-      creditTh.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+  console.log("'credit' table header is present.");
+
+  // await page.waitForTimeout(3000);
+
+  console.log("Ensuring the address note is present...");
+  await page.waitForSelector(".myAccount_addressNote__eqWHQ", {
+    state: "visible",
   });
 
-  await page.waitForTimeout(3000);
+  // console.log("Ensuring 'See full description of work' link is present...");
+  // await page.waitForSelector('a[href="/sow"]', {
+  //   state: "visible",
+  // });
 
-  console.log("Scrolling to the address note...");
-  await page.evaluate(() => {
-    const addressNoteSpan = document.querySelector(
-      ".myAccount_addressNote__eqWHQ"
-    );
-    if (addressNoteSpan) {
-      addressNoteSpan.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
+  // console.log("Clicking on 'See full description of work' link...");
+  // await page.click('a[href="/sow"]');
+  // console.log("Navigated to the 'See full description of work' page.");
 
-  await page.waitForTimeout(3000);
+  // await page.waitForTimeout(3000);
 
-  console.log("Scrolling to 'See full description of work' link...");
-  await page.evaluate(() => {
-    const link = Array.from(document.querySelectorAll("a")).find(
-      (el) => el.textContent === "See full description of work"
-    );
-    if (link) {
-      link.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
+  // console.log("Ensuring 'Tiger Paw Roof Deck Protection' is present...");
+  // await page.waitForFunction(
+  //   () => {
+  //     const section = [
+  //       ...document.querySelectorAll("p, h1, h2, h3, h4, h5, h6"),
+  //     ] // Adjust the selectors as needed
+  //       .find((el) =>
+  //         el.textContent.includes("Tiger Paw Roof Deck Protection")
+  //       );
+  //     return section !== undefined;
+  //   },
+  //   { timeout: 5000 }
+  // );
 
-  await page.waitForTimeout(3000);
+  // // await page.waitForTimeout(3000);
 
-  await page.evaluate(() => {
-    const link = document.querySelector('a[href="/sow"]');
-    if (link) {
-      link.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
+  // console.log("Ensuring 'Exclusions:' section is present...");
+  // await page.waitForFunction(
+  //   () => {
+  //     const exclusionsElement = [...document.querySelectorAll("strong")] // Adjust the selector as needed
+  //       .find((el) => el.textContent.includes("Exclusions:"));
+  //     return exclusionsElement !== undefined;
+  //   },
+  //   { timeout: 5000 }
+  // );
 
-  await page.waitForTimeout(2000);
+  // await page.waitForTimeout(3000);
 
-  await page.evaluate(() => {
-    const link = document.querySelector('a[href="/sow"]');
-    if (link) {
-      link.target = "_self";
-    }
-  });
+  // await page.goto("https://estimatorstg.gunnerroofing.com/my-account");
 
-  await page.click('a[href="/sow"]');
+  // console.log("Returned to my account.");
 
-  console.log("Navigated to the 'See full description of work' page.");
-
-  await page.waitForTimeout(3000);
-
-  console.log("Scrolling to 'Tiger Paw Roof Deck Protection'...");
-  await page.evaluate(() => {
-    const section = [...document.querySelectorAll("p, h1, h2, h3, h4, h5, h6")] // Adjust the selectors as needed
-      .find((el) => el.textContent.includes("Tiger Paw Roof Deck Protection"));
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
-
-  await page.waitForTimeout(3000);
-
-  await page.evaluate(() => {
-    const exclusionsElement = [...document.querySelectorAll("strong")] // Adjust the selector as needed
-      .find((el) => el.textContent.includes("Exclusions:"));
-    if (exclusionsElement) {
-      exclusionsElement.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
-
-  await page.waitForTimeout(3000);
-
-  await page.goto("https://estimatorstg.gunnerroofing.com/my-account");
-
-  console.log("Returned to my account.");
-
-  await page.waitForTimeout(3000);
-
-  console.log("Scrolling to 'Balance Remaining:'...");
+  console.log("Ensuring 'Balance Remaining:' is present...");
   await page.evaluate(() => {
     const strongTags = Array.from(document.querySelectorAll("strong"));
     const target = strongTags.find((el) =>
       el.textContent.includes("Balance Remaining:")
     );
     if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.scrollIntoView({ behavior: "auto", block: "center" });
     }
   });
-
-  await page.waitForTimeout(3000);
 
   console.log("Clicking on the 'Make Payment' button...");
   const makePaymentButtonSelector = 'button:has-text("Make Payment")';
   await page.waitForSelector(makePaymentButtonSelector, { state: "visible" });
   await page.click(makePaymentButtonSelector);
 
-  await page.waitForTimeout(3000);
-
-  console.log("Scrolling to 'Selected add-ons:'...");
+  console.log("Ensuring 'Selected add-ons:' is present...");
   await page.evaluate(() => {
     const pTag = document.querySelector(
       "p.SelectionSummary_infoSubTitle__1V8ku"
     );
     if (pTag) {
-      pTag.scrollIntoView({ behavior: "smooth", block: "center" });
+      pTag.scrollIntoView({ behavior: "auto", block: "center" });
     }
   });
 
-  await page.waitForTimeout(3000);
-
-  console.log("Scrolling to 'Preferred start date:'...");
+  console.log("Ensuring 'Preferred start date:' is present...");
   await page.evaluate(() => {
-    const pTag = document.querySelector(
-      "p.SelectionSummary_infoSubTitle__1V8ku"
-    );
     const preferredStartDateTag = Array.from(
       document.querySelectorAll("p.SelectionSummary_infoSubTitle__1V8ku")
     ).find((el) => el.textContent.includes("Preferred start date:"));
     if (preferredStartDateTag) {
       preferredStartDateTag.scrollIntoView({
-        behavior: "smooth",
+        behavior: "auto",
         block: "center",
       });
     } else {
@@ -1085,18 +1002,15 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
     }
   });
 
-  await page.waitForTimeout(3000);
-
+  console.log("Ensuring 'Log Out' link is present...");
   await page.evaluate(() => {
     const logOutLink = document.querySelector(
       'a.nav-link[style*="cursor: pointer;"]'
     );
     if (logOutLink) {
-      logOutLink.scrollIntoView({ behavior: "smooth", block: "center" });
+      logOutLink.scrollIntoView({ behavior: "auto", block: "center" });
     }
   });
-
-  await page.waitForTimeout(3000);
 
   await page.click('a:has-text("Log Out")');
   console.log("Clicked on 'Log Out' link.");
