@@ -88,7 +88,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   await page.goto("https://estimatorstg.gunnerroofing.com/login");
 
   await page.waitForSelector("#mui-1", { state: "visible" });
-  await page.fill("#mui-1", "gunnerplaywright+02301@gmail.com");
+  await page.fill("#mui-1", "gunnerplaywright+02264@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
   console.log(`Email Input Value: ${emailValue}`);
 
@@ -119,7 +119,7 @@ test('Check "Your quote is ready!" email and login', async ({ browser }) => {
   console.log("Logged in, starting color selection verification.");
 
   const iframeSelector =
-    'iframe[src*="https://visualizer.gunnerroofing.com/147a4cef-7cad-4382-87cb-12111252c7f4/"]';
+    'iframe[src*="https://visualizer.gunnerroofing.com/58b6d79c-4473-4d06-ba3d-1fe75ec522b7/"]';
   const iframeHandle = await page.waitForSelector(iframeSelector, {
     state: "attached",
     timeout: 20000,

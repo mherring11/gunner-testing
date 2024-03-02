@@ -29,6 +29,7 @@ async function selectStateAndAnswerQuestions(page, formData) {
   console.log("Setting insurance coverage to 'Yes'...");
   await page.evaluate(() => {
     const yesRadio = document.querySelector("input#btnYes");
+
     if (yesRadio) {
       yesRadio.checked = true;
     }
@@ -69,23 +70,27 @@ async function registerUser(page, user) {
   await page.goto("https://staging.gunnerroofing.com/register/");
 
   console.log("Filling street address...");
-  await page.type('input[name="streetAddress"]', user.streetAddress);
   console.log("Filling city...");
-  await page.type('input[name="city"]', user.city);
   console.log("Filling ZIP code...");
-  await page.type('input[name="zip"]', user.zip);
   console.log("Filling phone number...");
-  await page.type('input[name="phone"]', user.phone);
   console.log("Filling email...");
-  await page.type('input[name="email"]', user.userEmail);
   console.log("Filling password...");
-  await page.type('input[name="password"]', user.password);
   console.log("Verifying password...");
-  await page.type("input#confirmPassword", user.password);
   console.log("Filling first name...");
-  await page.type('input[name="firstName"]', user.firstName);
   console.log("Filling last name...");
-  await page.type('input[name="lastName"]', user.lastName);
+  
+  await page.evaluate((user) => {
+      document.querySelector('input[name="streetAddress"]').value = user.streetAddress;
+      document.querySelector('input[name="city"]').value = user.city;
+      document.querySelector('input[name="zip"]').value = user.zip;
+      document.querySelector('input[name="phone"]').value = user.phone;
+      document.querySelector('input[name="email"]').value = user.userEmail;
+      document.querySelector('input[name="password"]').value = user.password;
+      document.querySelector("input#confirmPassword").value = user.password;
+      document.querySelector('input[name="firstName"]').value = user.firstName;
+      document.querySelector('input[name="lastName"]').value = user.lastName;
+  }, user);
+
   console.log("Selecting 'Immediately' for the timeframe...");
   await page.selectOption("select#timeframe", "Immediately");
   console.log("Selecting 'Call' as preferred contact method...");
@@ -93,34 +98,79 @@ async function registerUser(page, user) {
 
   await selectStateAndAnswerQuestions(page, user);
 
-  console.log("Submitting the form.. .");
-  await page.click('button[type="submit"]');
+  // Ensure a request to reCAPTCHA's API is made
+await test.step('Analyze network requests', async () => {
+    // Listen for request
+    page.on('request', request => {
+      // URL request
+      if (request.url().includes('https://www.google.com/recaptcha/api2')) {
+        console.log('Detected a reCAPTCHA API request:', request.url());
+      }
+    });
+  
+    console.log("Submitting the form to trigger reCAPTCHA...");
+    await page.click('button[type="submit"]');
 
-  console.log("Waiting on the 'Thank You' page...");
-  await page.waitForTimeout(2000);
+    const currentUrl = page.url();
+    console.log(`Current URL (Thank You page): ${currentUrl}`);
+
+    if (currentUrl.includes("/thank-you/")) {
+      console.log("Successfully navigated to the Thank You page.");
+      // Additional actions or checks can be performed here.
+  } else {
+      console.warn("Did not navigate to the expected Thank You page.");
+      // Handle unexpected navigation results.
+  }
+
+
+  
+    console.log("Waiting for reCAPTCHA network requests...");
+    // await page.waitForTimeout(1000);
+  });
+  
+
+  // Check for reCAPTCHA presence 
+  console.log("Checking for reCAPTCHA iframe...");
+  const isCaptchaFramePresent = await page.isVisible(
+    '.grecaptcha-logo iframe[title="reCAPTCHA"]'
+  );
+  if (!isCaptchaFramePresent) {
+    console.log(
+      `Expected reCAPTCHA iframe to be present for user: ${user.userEmail}, but it wasn't.`
+    );
+  } else {
+    console.log(`reCAPTCHA iframe detected for user: ${user.userEmail}.`);
+  }
+
+
 
   console.log(`Registration completed for user: ${user.userEmail}`);
 }
 
-test("bulk registration with API data", async ({ page }) => {
+test("reCAPTCHA verification", async ({ page }) => {
   test.setTimeout(180000);
   const users = await fetchDataFromSheet();
-  
+
   if (users.length > 0) {
     for (let i = 0; i < users.length; i++) {
       await registerUser(page, users[i]);
-      // Check if the current user is not the last one before navigating back
       if (i < users.length - 1) {
-        console.log("Navigating back to the registration page for the next user...");
+        console.log(
+          "Navigating back to the registration page for the next user..."
+        );
         await page.goto("https://staging.gunnerroofing.com/register/");
       } else {
         console.log("Staying on the 'Thank You' page for the last user.");
-        // Optionally wait on the 'Thank You' page
-        await page.waitForTimeout(2000);
+        // const queryString = await page.evaluate(() => window.location.search);
+        // console.log(queryString);
+        
+        // await page.waitForTimeout(2000);
       }
     }
     console.log("All users registered successfully.");
   } else {
     console.log("No users to register.");
   }
+
+
 });
