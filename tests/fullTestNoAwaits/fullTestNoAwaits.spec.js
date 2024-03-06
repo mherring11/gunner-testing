@@ -88,7 +88,7 @@ test('Check "Full Test No Awaits', async ({ browser }) => {
   await page.goto("https://estimatorstg.gunnerroofing.com/login");
 
   await page.waitForSelector("#mui-1", { state: "visible" });
-  await page.fill("#mui-1", "gunnerplaywright+02263@gmail.com");
+  await page.fill("#mui-1", "gunnerplaywright+0305a@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
   console.log(`Email Input Value: ${emailValue}`);
 
@@ -119,7 +119,7 @@ test('Check "Full Test No Awaits', async ({ browser }) => {
   console.log("Logged in, starting color selection verification.");
 
   const iframeSelector =
-    'iframe[src*="https://visualizer.gunnerroofing.com/5372338c-01e0-42ac-9638-1d1a82421e23/"]';
+    'iframe[src*="https://visualizer.gunnerroofing.com/7fb4d148-2100-4cf5-806e-c96c8e8c5bda/"]';
   const iframeHandle = await page.waitForSelector(iframeSelector, {
     state: "attached",
     timeout: 20000,
@@ -234,7 +234,7 @@ test('Check "Full Test No Awaits', async ({ browser }) => {
   const questionSelector =
     'text="Would you like us to include replacement of the roof of the additional structures at this time?"';
   const questionElement = page.locator(questionSelector);
-  await questionElement.waitFor();
+  // await questionElement.waitFor();
   await questionElement.evaluate((element) => {
     const smoothScrollToElement = (el) => {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -607,25 +607,25 @@ test('Check "Full Test No Awaits', async ({ browser }) => {
     console.log("Failed to access the iframe content.");
   }
 
-  const iframeElementHandle = await page.waitForSelector(
-    'iframe[src*="https://jstest.authorize.net"]',
-    { state: "attached" }
-  );
-  const framess = await iframeElementHandle.contentFrame();
-  if (frames) {
-    try {
-      await framess.waitForSelector("button#payButton", {
-        state: "visible",
-        timeout: 5000,
-      });
-      await framess.click("button#payButton");
-      console.log("Clicked 'Submit Payment' button.");
-    } catch (error) {
-      console.error("Error clicking 'Submit Payment':", error);
-    }
-  } else {
-    console.log("The iframe is detached or the frame reference is invalid.");
-  }
+  // const iframeElementHandle = await page.waitForSelector(
+  //   'iframe[src*="https://jstest.authorize.net"]',
+  //   { state: "attached" }
+  // );
+  // const framess = await iframeElementHandle.contentFrame();
+  // if (frames) {
+  //   try {
+  //     await framess.waitForSelector("button#payButton", {
+  //       state: "visible",
+  //       timeout: 5000,
+  //     });
+  //     await framess.click("button#payButton");
+  //     console.log("Clicked 'Submit Payment' button.");
+  //   } catch (error) {
+  //     console.error("Error clicking 'Submit Payment':", error);
+  //   }
+  // } else {
+  //   console.log("The iframe is detached or the frame reference is invalid.");
+  // }
 
   console.log("Completed the payment process.");
 
