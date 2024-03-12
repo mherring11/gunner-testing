@@ -1,5 +1,6 @@
 const { test, expect } = require("@playwright/test");
 const axios = require("axios");
+const colors = require("colors");
 
 async function fetchDataFromSheet() {
   try {
@@ -11,22 +12,22 @@ async function fetchDataFromSheet() {
         },
       }
     );
-    console.log("Data fetched successfully:", response.data);
+    console.log("Data fetched successfully:".yellow, response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching data from sheet:", error);
+    console.error("Error fetching data from sheet:".yellow, error);
     return [];
   }
 }
 
 async function selectStateAndAnswerQuestions(page, formData) {
-  console.log(`Selecting state: ${formData.state}`);
+  console.log(`Selecting state: ${formData.state}`.yellow);
   await page.selectOption('select[name="state"]', formData.state);
   await expect(page.locator('select[name="state"]')).toHaveValue(
     formData.state
   );
 
-  console.log("Setting insurance coverage to 'Yes'...");
+  console.log("Setting insurance coverage to 'Yes'...".yellow);
   await page.evaluate(() => {
     const yesRadio = document.querySelector("input#btnYes");
     if (yesRadio) {
@@ -36,16 +37,16 @@ async function selectStateAndAnswerQuestions(page, formData) {
 
   const isYesChecked = await page.isChecked("input#btnYes");
   if (isYesChecked) {
-    console.log("Confirmed: Insurance coverage set to 'Yes'.");
+    console.log("Confirmed: Insurance coverage set to 'Yes'.".yellow);
   } else {
     console.warn(
-      "Warning: Unable to confirm 'Yes' selection for insurance coverage."
+      "Warning: Unable to confirm 'Yes' selection for insurance coverage.".yellow
     );
   }
 
-  console.log("Skipping additional services selection...");
+  console.log("Skipping additional services selection...".yellow);
 
-  console.log("Setting referral answer to 'No'...");
+  console.log("Setting referral answer to 'No'...".yellow);
   await page.evaluate(() => {
     const noRadio = document.querySelector("input#btnRefNo");
     if (noRadio) {
@@ -55,51 +56,51 @@ async function selectStateAndAnswerQuestions(page, formData) {
 
   const isNoChecked = await page.isChecked("input#btnRefNo");
   if (isNoChecked) {
-    console.log("Confirmed: Referral answer set to 'No'.");
+    console.log("Confirmed: Referral answer set to 'No'.".yellow);
   } else {
     console.warn(
-      "Warning: Unable to confirm 'No' selection for referral question."
+      "Warning: Unable to confirm 'No' selection for referral question.".yellow
     );
   }
 }
 
 async function registerUser(page, user) {
-  console.log(`Registering user: ${user.userEmail}`);
+  console.log(`Registering user: ${user.userEmail}`.yellow);
 
   await page.goto("https://staging.gunnerroofing.com/register/");
 
-  console.log("Filling street address...");
+  console.log("Filling street address...".yellow);
   await page.type('input[name="streetAddress"]', user.streetAddress);
-  console.log("Filling city...");
+  console.log("Filling city...".yellow);
   await page.type('input[name="city"]', user.city);
-  console.log("Filling ZIP code...");
+  console.log("Filling ZIP code...".yellow);
   await page.type('input[name="zip"]', user.zip);
-  console.log("Filling phone number...");
+  console.log("Filling phone number...".yellow);
   await page.type('input[name="phone"]', user.phone);
-  console.log("Filling email...");
+  console.log("Filling email...".yellow);
   await page.type('input[name="email"]', user.userEmail);
-  console.log("Filling password...");
+  console.log("Filling password...".yellow);
   await page.type('input[name="password"]', user.password);
-  console.log("Verifying password...");
+  console.log("Verifying password...".yellow);
   await page.type("input#confirmPassword", user.password);
-  console.log("Filling first name...");
+  console.log("Filling first name...".yellow);
   await page.type('input[name="firstName"]', user.firstName);
-  console.log("Filling last name...");
+  console.log("Filling last name...".yellow);
   await page.type('input[name="lastName"]', user.lastName);
-  console.log("Selecting 'Immediately' for the timeframe...");
+  console.log("Selecting 'Immediately' for the timeframe...".yellow);
   await page.selectOption("select#timeframe", "Immediately");
-  console.log("Selecting 'Call' as preferred contact method...");
+  console.log("Selecting 'Call' as preferred contact method...".yellow);
   await page.click('label[for="btnCall"]');
 
   await selectStateAndAnswerQuestions(page, user);
 
-  console.log("Submitting the form.. .");
+  console.log("Submitting the form.. .".yellow);
   await page.click('button[type="submit"]');
 
-  console.log("Waiting on the 'Thank You' page...");
+  console.log("Waiting on the 'Thank You' page...".yellow);
   await page.waitForTimeout(2000);
 
-  console.log(`Registration completed for user: ${user.userEmail}`);
+  console.log(`Registration completed for user: ${user.userEmail}`.yellow);
 }
 
 test("bulk registration with API data", async ({ page }) => {
@@ -111,16 +112,16 @@ test("bulk registration with API data", async ({ page }) => {
       await registerUser(page, users[i]);
       
       if (i < users.length - 1) {
-        console.log("Navigating back to the registration page for the next user...");
+        console.log("Navigating back to the registration page for the next user...".yellow);
         await page.goto("https://staging.gunnerroofing.com/register/");
       } else {
-        console.log("Staying on the 'Thank You' page for the last user.");
+        console.log("Staying on the 'Thank You' page for the last user.".yellow);
         
         await page.waitForTimeout(2000);
       }
     }
-    console.log("All users registered successfully.");
+    console.log("All users registered successfully.".yellow);
   } else {
-    console.log("No users to register.");
+    console.log("No users to register.".yellow);
   }
 });
