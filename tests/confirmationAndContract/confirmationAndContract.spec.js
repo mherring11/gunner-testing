@@ -82,10 +82,10 @@ test('Check "Your order confirmation" email and click on "Log in to my account"'
   await page.goto("https://estimatorstg.gunnerroofing.com/login");
   console.log("On login page, filling in credentials...");
   await page.waitForSelector("#mui-1", { state: "visible" });
-  await page.fill("#mui-1", "gunnerplaywright+02273@gmail.com");
+  await page.fill("#mui-1", "gunnerplaywright+0308a@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
   console.log(`Email Input Value confirmed: ${emailValue}`);
-  expect(emailValue).toBe("gunnerplaywright+02273@gmail.com");
+  expect(emailValue).toBe("gunnerplaywright+0308a@gmail.com");
 
   await page.waitForSelector("#mui-2", { state: "visible" });
   await page.fill("#mui-2", "123PWtest!");

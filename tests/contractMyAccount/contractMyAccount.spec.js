@@ -1,5 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const axios = require("axios");
+const colors = require('colors');
+
 
 async function fetchDataFromSheet() {
   console.log("Starting to fetch data from sheet...");
@@ -19,9 +21,8 @@ async function fetchDataFromSheet() {
     return [];
   }
 }
-
+test.setTimeout(120000);
 test('Check "Contract and My Account"', async ({ browser }) => {
-  test.setTimeout(120000);
   console.log("Starting test to check the order confirmation email...");
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -30,10 +31,10 @@ test('Check "Contract and My Account"', async ({ browser }) => {
   await page.goto("https://estimatorstg.gunnerroofing.com/login");
   console.log("On login page, filling in credentials...");
   await page.waitForSelector("#mui-1", { state: "visible" });
-  await page.fill("#mui-1", "gunnerplaywright+022102@gmail.com");
+  await page.fill("#mui-1", "gunnerplaywright+0308c@gmail.com");
   const emailValue = await page.$eval("#mui-1", (el) => el.value);
   console.log(`Email Input Value confirmed: ${emailValue}`);
-  expect(emailValue).toBe("gunnerplaywright+022102@gmail.com");
+  expect(emailValue).toBe("gunnerplaywright+0308c@gmail.com");
 
   await page.waitForSelector("#mui-2", { state: "visible" });
   await page.fill("#mui-2", "123PWtest!");
@@ -47,513 +48,472 @@ test('Check "Contract and My Account"', async ({ browser }) => {
   await page.waitForSelector(".myAccount_paymentScheduleItem__EZLf8", {
     visible: true,
   });
-  console.log("Account page loaded, scrolling to bottom of page...");
-  await page.evaluate(() => {
-    const targetElement = document.querySelector(
-      ".myAccount_paymentScheduleItem__EZLf8"
-    );
-    if (targetElement) {
-      const targetPosition =
-        targetElement.getBoundingClientRect().top + window.scrollY;
-      const startPosition = window.scrollY;
-      const distance = targetPosition - startPosition;
-      const duration = 1000;
-      let startTime = null;
-      function smoothScroll(currentTime) {
-        if (startTime === null) startTime = currentTime;
-        const timeElapsed = currentTime - startTime;
-        const nextScroll = easeFunction(
-          timeElapsed,
-          startPosition,
-          distance,
-          duration
-        );
-        window.scrollTo(0, nextScroll);
-        if (timeElapsed < duration) requestAnimationFrame(smoothScroll);
-      }
-      function easeFunction(t, b, c, d) {
-        t /= d / 2;
-        if (t < 1) return (c / 2) * t * t + b;
-        t--;
-        return (-c / 2) * (t * (t - 2) - 1) + b;
-      }
-      requestAnimationFrame(smoothScroll);
-    }
-  });
-  console.log("Scrolled to bottom");
+ 
+  const currentUrl = page.url();
 
-  await page.waitForTimeout(2000);
+if (currentUrl.includes('/thanks?pid=44856&event=signing_complete')) {
+  console.log("Verified: The user's My Account page is displayed.".yellow);
+} else {
+  console.log("Verification Failed: The user's My Account page is not displayed. Current URL:".yellow, currentUrl);
+}
 
-  console.log("Scrolling back up to 'Sign Contract' button...");
+  // await page.waitForTimeout(3000);
 
-  await page.evaluate(() => {
-    const signContractButton = Array.from(
-      document.querySelectorAll("button")
-    ).find((button) => button.textContent === "Sign Contract");
-    if (signContractButton) {
-      signContractButton.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  });
+  console.log("Verifying contract status on the My Account page...");
 
-  console.log("Scroll to 'Sign Contract' button completed.");
+// Selector to identify the contract status element including the "Signed" status, date, and link.
+const contractStatusSelector = 'td.MuiTableCell-root.MuiTableCell-body.MuiTableCell-sizeMedium.css-19iew5f div';
 
-  console.log("Attempting to click 'Sign Contract' button...");
-  await page.click('button:has-text("Sign Contract")');
-  console.log(
-    "'Sign Contract' button clicked. Waiting for DocuSign page to load..."
-  );
+await page.waitForSelector(contractStatusSelector, { state: "visible" });
+const contractStatusText = await page.textContent(contractStatusSelector);
+const contractLink = await page.getAttribute(contractStatusSelector + ' a', 'href');
 
-  await page.waitForNavigation({
-    url: (url) => url.href.startsWith("https://na4.docusign.net/Signing/"),
-    waitUntil: "networkidle",
-  });
+if (contractStatusText.includes('Signed:') && contractLink) {
+  console.log("Verified: Contract status is 'Signed' with the execution date and a link to the executed contract.".yellow);
+  console.log("Contract Status Details:".yellow, contractStatusText);
+  console.log("DocuSign Contract Link:".yellow, contractLink);
+} else {
+  console.log("Verification Failed: Contract status, execution date, or DocuSign contract link is missing.".yellow);
+}
 
-  console.log("DocuSign page loaded.");
 
-  console.log(
-    "Looking for the checkbox to agree to use electronic records and signatures..."
-  );
-  await page.click(
-    'label:has-text("I agree to use electronic records and signatures.")'
-  );
+  // await page.waitForTimeout(3000);
 
-  console.log(
-    "Checkbox for electronic records and signatures agreement clicked."
-  );
+  console.log("Verifying payment status in the Payments section...".yellow);
 
-  await page.waitForTimeout(2000);
+// Since the information you need is within a table, we will check for the presence of specific texts within the table.
+// Note: This approach assumes you have a way to select or identify the specific payment row you want to verify. 
+// For simplicity, this example will verify the presence of the "Initial down payment" and its details.
 
-  console.log("Attempting to click the 'Continue' button...");
-  await page.waitForSelector("#action-bar-btn-continue", { state: "visible" });
-  await page.click("#action-bar-btn-continue");
-  console.log("'Continue' button clicked.");
+const paymentTypeSelector = 'tr.css-15mmwl9 th.MuiTableCell-root.MuiTableCell-body';
+const paymentTitleSelector = 'tr.css-15mmwl9 td.MuiTableCell-root.MuiTableCell-body:nth-child(2)';
+const paymentAmountSelector = 'tr.css-15mmwl9 td.MuiTableCell-root.MuiTableCell-body:nth-child(3)';
+const paymentDateSelector = 'tr.css-15mmwl9 td.MuiTableCell-root.MuiTableCell-body:nth-child(4)';
 
-  await page.waitForTimeout(2000);
+const paymentType = await page.textContent(paymentTypeSelector);
+const paymentTitle = await page.textContent(paymentTitleSelector);
+const paymentAmount = await page.textContent(paymentAmountSelector);
+const paymentDate = await page.textContent(paymentDateSelector);
 
-  console.log("Attempting to click on the 'Start' button...");
+if (paymentType && paymentTitle && paymentAmount && paymentDate) {
+  console.log("Payment status verified successfully:".yellow);
+  console.log(`Type: ${paymentType}, Title: ${paymentTitle}, Amount: ${paymentAmount}, Date: ${paymentDate}`.yellow);
+} else {
+  console.log("Verification failed: Unable to verify payment status in the Payments section.".yellow);
+}
 
-  try {
-    await page.waitForSelector("#navigate-btn", { state: "visible" });
 
-    await page.click("#navigate-btn");
+  // await page.waitForTimeout(3000);
 
-    console.log("'Start' button clicked successfully.");
-  } catch (error) {
-    console.error("Error clicking the 'Start' button:", error.message);
-  }
+  console.log("Verifying residence address...".yellow);
 
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
-
-  console.log("Attempting to click on the 'Sign' div...");
-  await page.waitForSelector('div.signature-tab-content:has-text("Sign")', {
-    state: "visible",
-  });
-  await page.click('div.signature-tab-content:has-text("Sign")');
-  console.log("'Sign' div clicked successfully.");
-
-  console.log("Waiting for 2 seconds before scrolling...");
-  await page.waitForTimeout(2000);
-
-  console.log("Attempting to click on the 'Adopt and Sign' button...");
-
-  const adoptAndSignButtonSelector =
-    'button[data-qa="adopt-submit"][value="signature"]';
-  await page.waitForSelector(adoptAndSignButtonSelector, { state: "visible" });
-  await page.click(adoptAndSignButtonSelector);
-
-  console.log("'Adopt and Sign' button clicked successfully.");
-
-  await page.waitForTimeout(2000);
-
-  // ----------SCROLL BACK UP TO FIRST TEST DOCUMENT----------
-
-  console.log("Scrolling back up to the specified 'Test Document' div...");
-  await page.evaluate(() => {
-    const pageInfoElements = Array.from(
-      document.querySelectorAll("div.page-info")
-    );
-    const targetDiv = pageInfoElements.find(
-      (el) =>
-        el.innerText.includes("Test Document") &&
-        el.querySelector(".page-info-xofx").innerText.includes("2 of 11")
-    );
-    if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      console.error("Specified 'Test Document' div not found.");
-    }
-  });
-
-  // ----------CLICK ON FIRST AND SECOND INTIALS----------
-
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
-
-  console.log("Clicking on the 'Initial' div...");
-  await page.waitForSelector('text="Initial"', {
-    state: "visible",
-  });
-  await page.click('text="Initial"');
-
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
-
-  console.log("Clicking on the 'Initial' div...");
-  await page.waitForSelector('text="Initial"', {
-    state: "visible",
-  });
-  await page.click('text="Initial"');
-
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
-
-  console.log("Clicking on the next 'Initial' div...");
-  const initialDivs = await page.$$(
-    "div.initials-tab-content.tab-button-yellow.v2"
-  );
-
-  if (initialDivs.length > 1) {
-    await initialDivs[1].click();
-    console.log("Second 'Initial' div clicked successfully.");
+  // Selector for the address paragraph
+  const addressSelector = 'p:has(span.myAccount_addressNote__eqWHQ)';
+  
+  // Assuming you have a function or a way to dynamically fetch the expected address
+  // For demonstration, let's say you have it stored in a variable like this:
+  const expectedAddress = "your logic to fetch the expected address dynamically";
+  
+  // Retrieve the address text from the page
+  const addressText = await page.$eval(addressSelector, el => el.textContent.trim());
+  
+  // Verify the address
+  if (addressText.includes(expectedAddress)) {
+    console.log(`Verified: The residence address is correctly displayed as '${expectedAddress}'.`.yellow);
   } else {
-    console.error("Not enough 'Initial' divs found.");
+    console.log(`Verification failed: The displayed address '${addressText}' does not match the expected address '${expectedAddress}'.`.yellow);
   }
 
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
+  console.log("Verifying roof color...".yellow);
 
-  console.log("Scrolling to 'Test Document 4 of 11'...");
-  await page.evaluate(() => {
-    const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
-    const targetDiv = pageInfoDivs.find(
-      (div) =>
-        div.textContent.includes("Test Document") &&
-        div.textContent.includes("4 of 11")
-    );
-    if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+// Selector for the paragraph containing the roof color
+const roofColorSelector = 'p'; // Adjust the selector if it can be more specific
+
+// Dynamically obtained expected roof color
+const expectedRoofColor = "your logic to fetch the expected roof color dynamically";
+
+// Retrieve the roof color text from the page
+const roofColorText = await page.$eval(roofColorSelector, el => el.textContent.trim());
+
+// Check if the retrieved text includes the expected roof color
+if (roofColorText.includes(expectedRoofColor)) {
+  console.log(`Verified: The correct roof color '${expectedRoofColor}' is displayed.`.yellow);
+} else {
+  console.log(`Verification failed: The displayed roof color does not match the expected '${expectedRoofColor}'. Actual: '${roofColorText}'`.yellow);
+}
+
+console.log("Verifying 'See full description of work' link...".yellow);
+
+// Selector for the link
+const baseURL = 'https://estimatorstg.gunnerroofing.com';
+
+// Selector for the link
+const linkSelector = 'a[href="/sow"]';
+
+// Check if the link is displayed
+const isLinkDisplayed = await page.isVisible(linkSelector);
+if (!isLinkDisplayed) {
+    console.error("'See full description of work' link is not displayed.".yellow);
+} else {
+    console.log("'See full description of work' link is displayed.".yellow);
+    
+    // Get the href attribute of the link to verify it points to the correct URL
+    const href = await page.getAttribute(linkSelector, 'href');
+    const expectedHref = "/sow";
+    if (href === expectedHref) {
+        console.log(`Verified: The link points to the correct href '${href}'.`.yellow);
+        
+        // Concatenate base URL with href to form a complete URL
+        const fullURL = baseURL + href;
+
+        // Use page.goto() to navigate in the same tab to the complete URL
+        await page.goto(fullURL);
+        // Add your subsequent code here for what needs to be done on the /sow page
     } else {
-      console.error("'Test Document 4 of 11' not found.");
+        console.error(`Verification failed: The link href '${href}' does not match the expected '${expectedHref}'.`.yellow);
     }
+
+  // Now on the new page, verify the "Statement of Work" header is present
+  const sowHeaderSelector = 'h1';
+  const sowHeaderText = await page.textContent(sowHeaderSelector);
+  const expectedSowHeaderText = "Statement of Work";
+  if (sowHeaderText.trim() === expectedSowHeaderText) {
+    console.log(`Verified: The 'Statement of Work' page is displayed with the correct header.`.yellow);
+  } else {
+    console.error(`Verification failed: The header '${sowHeaderText}' does not match the expected '${expectedSowHeaderText}'.`.yellow);
+  }
+}
+
+
+  // Verify Gutters Section Text
+  const guttersTexts = await page.evaluate(() => {
+    const xpath = "//p[strong[contains(text(), 'Gutters:')]]";
+    const element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    return element ? element.textContent : null;
   });
+  console.log(guttersTexts ? `Verified: Gutters Section Text: ${guttersTexts}` : "Gutters section not found or text missing.".yellow);
 
-  console.log("Waiting for 2 seconds...");
-  await page.waitForTimeout(2000);
-
-  console.log("Scrolling to 'Test Document 5 of 11'...");
-  await page.evaluate(() => {
-    const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
-    const targetDiv = pageInfoDivs.find(
-      (div) =>
-        div.textContent.includes("Test Document") &&
-        div.textContent.includes("5 of 11")
-    );
-    if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      console.error("'Test Document 5 of 11' not found.");
-    }
+  // Verify Gutter Guards Text (Assuming it's similarly structured)
+  const gutterGuardsText = await page.evaluate(() => {
+    const xpath = "//p[strong[contains(text(), 'Gutter Guards:')]]";
+    const element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    return element ? element.textContent : null;
   });
+  console.log(gutterGuardsText ? `Verified: Gutter Guards Section Text: ${gutterGuardsText}` : "Gutter Guards section not found or text missing.".yellow);
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 6 of 11'..."
-  );
-  await page.waitForTimeout(2000);
-
-  console.log("Scrolling to 'Test Document 6 of 11'...");
-  await page.evaluate(() => {
-    const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
-    const targetDiv = pageInfoDivs.find(
-      (div) =>
-        div.textContent.includes("Test Document") &&
-        div.textContent.includes("6 of 11")
-    );
-    if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      console.error("'Test Document 6 of 11' not found.");
-    }
+  // Verify Skylights Section Text
+  const skylightsTexts = await page.evaluate(() => {
+    const xpath = "//p[strong[contains(text(), 'Skylights:')]]";
+    const element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    return element ? element.textContent : null;
   });
+  console.log(skylightsTexts ? `Verified: Skylights Section Text: ${skylightsTexts}` : "Skylights section not found or text missing.".yellow);
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 7 of 11'..."
-  );
-  await page.waitForTimeout(2000);
 
-  console.log("Scrolling to 'Test Document 7 of 11'...");
-  await page.evaluate(() => {
-    const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
-    const targetDiv = pageInfoDivs.find(
-      (div) =>
-        div.textContent.includes("Test Document") &&
-        div.textContent.includes("7 of 11")
-    );
-    if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      console.error("'Test Document 7 of 11' not found.");
-    }
-  });
+// Selector that targets the link by its class and the text it contains
+const myAccountLinkSelector = 'a.nav-link:has-text("My Account")';
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 8 of 11'..."
-  );
-  await page.waitForTimeout(2000);
+// Wait for the "My Account" link to be visible on the page
+await page.waitForSelector(myAccountLinkSelector, { state: 'visible' });
 
-  console.log("Scrolling to 'Test Document 8 of 11'...");
-  await page.evaluate(() => {
-    const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
-    const targetDiv = pageInfoDivs.find(
-      (div) =>
-        div.textContent.includes("Test Document") &&
-        div.textContent.includes("8 of 11")
-    );
-    if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      console.error("'Test Document 8 of 11' not found.");
-    }
-  });
+// Click on the "My Account" link
+await page.click(myAccountLinkSelector);
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 9 of 11'..."
-  );
-  await page.waitForTimeout(2000);
 
-  console.log("Scrolling to 'Test Document 9 of 11'...");
-  await page.evaluate(() => {
-    const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
-    const targetDiv = pageInfoDivs.find(
-      (div) =>
-        div.textContent.includes("Test Document") &&
-        div.textContent.includes("9 of 11")
-    );
-    if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      console.error("'Test Document 9 of 11' not found.");
-    }
-  });
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 10 of 11'..."
-  );
-  await page.waitForTimeout(2000);
+// Wait for the total price to be displayed without "Loading..."
+await page.waitForFunction(() => {
+  const pElements = [...document.querySelectorAll('p')]; // Get all <p> elements
+  const totalPriceElement = pElements.find(p => p.textContent.startsWith('Total: $')); // Find the <p> element that includes the total price
+  return totalPriceElement && !totalPriceElement.textContent.includes('Loading...'); // Check if the text is not "Loading..."
+});
 
-  console.log("Scrolling to 'Test Document 10 of 11'...");
-  await page.evaluate(() => {
-    const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
-    const targetDiv = pageInfoDivs.find(
-      (div) =>
-        div.textContent.includes("Test Document") &&
-        div.textContent.includes("10 of 11")
-    );
-    if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      console.error("'Test Document 10 of 11' not found.");
-    }
-  });
+// After waiting, fetch the total price text again
+const totalPriceElement = await page.$('p:has-text("Total: $")'); // Use Playwright's :has-text pseudo-class to find the element
+const totalPriceText = await totalPriceElement.textContent();
+const totalPrice = parseFloat(totalPriceText.replace(/[^0-9.]/g, ""));
 
-  console.log(
-    "Waiting for 2 seconds before scrolling to 'Test Document 11 of 11'..."
-  );
-  await page.waitForTimeout(2000);
+// Verification logic
+if (!isNaN(totalPrice) && totalPrice > 0) {
+  console.log(`Verification successful: The total price of $${totalPrice} is present on the page and properly formatted.`.yellow);
+} else {
+  console.error(`Verification failed: The total price is either not present, not properly formatted, or not greater than zero.`.yellow);
+}
 
-  console.log("Scrolling to 'Test Document 11 of 11'...");
-  await page.evaluate(() => {
-    const pageInfoDivs = Array.from(document.querySelectorAll("div.page-info"));
-    const targetDiv = pageInfoDivs.find(
-      (div) =>
-        div.textContent.includes("Test Document") &&
-        div.textContent.includes("11 of 11")
-    );
-    if (targetDiv) {
-      targetDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      console.error("'Test Document 11 of 11' not found.");
-    }
-  });
 
-  await page.waitForTimeout(2000);
+  
+  // Assuming totalPrice has already been calculated
 
-  console.log("Clicking on the 'Finish' button...");
-  await page.click(
-    'button.documents-finish-button[data-action="action-bar-finish"]'
-  );
-  console.log("'Finish' button clicked.");
+// Calculate the expected 10% deposit from the total price
+const expectedDepositPercentage = 0.10;
+const expectedDepositAmount = totalPrice * expectedDepositPercentage;
 
-  await page.waitForTimeout(3000);
+// Selector for the element containing the deposit amount
+const depositSelector = 'li.myAccount_paymentScheduleItem__EZLf8:has-text("10% down")';
 
-  console.log("Attempting to click on the 'My Account' button...");
+// Wait for the deposit element to be visible and fetch its text
+await page.waitForSelector(depositSelector, { state: 'visible' });
+const depositText = await page.textContent(depositSelector);
 
-  const myAccountButtonSelector = 'a:has-text("My Account")';
-  await page.waitForSelector(myAccountButtonSelector, { state: "visible" });
-  await page.click(myAccountButtonSelector);
+// Extract the numerical value from the deposit text
+const depositAmountMatches = depositText.match(/[\d,]+\.\d{2}/); // Match the currency format
+let depositAmount = depositAmountMatches ? parseFloat(depositAmountMatches[0].replace(/,/g, '')) : null; // Convert to float and handle commas
 
-  console.log("'My Account' button clicked successfully.");
+// Verification logic to check if the displayed deposit matches the expected 10% deposit
+if (depositAmount && Math.abs(depositAmount - expectedDepositAmount) < 0.01) { // Allows for slight rounding differences
+  console.log(`Verification successful: The initial 10% deposit amount of $${depositAmount.toFixed(2)} matches the expected amount of $${expectedDepositAmount.toFixed(2)}.`.yellow);
+} else {
+  console.error(`Verification failed: The displayed deposit amount of $${depositAmount ? depositAmount.toFixed(2) : "N/A"} does not match the expected 10% deposit amount of $${expectedDepositAmount.toFixed(2)}.`.yellow);
+}
 
-  await page.waitForTimeout(3000);
 
-  console.log("Scrolling to 'credit' table header...");
-  await page.waitForSelector('th:has-text("credit")', {
-    state: "visible",
-  });
-  await page.evaluate(() => {
-    const creditTh = Array.from(document.querySelectorAll("th")).find(
-      (th) => th.textContent.trim() === "credit"
-    );
-    if (creditTh) {
-      creditTh.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
+// Assuming totalPrice has already been calculated
 
-  await page.waitForTimeout(3000);
+// Calculate the expected 60% payment from the total price
+const expectedSecondPaymentPercentage = 0.60;
+const expectedSecondPaymentAmount = totalPrice * expectedSecondPaymentPercentage;
 
-  console.log("Scrolling to the address note...");
-  await page.evaluate(() => {
-    const addressNoteSpan = document.querySelector(
-      ".myAccount_addressNote__eqWHQ"
-    );
-    if (addressNoteSpan) {
-      addressNoteSpan.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
+// Selector for the element containing the 60% second payment amount
+const secondPaymentSelector = 'li.myAccount_paymentScheduleItem__EZLf8:has-text("60% upon start of project")';
 
-  await page.waitForTimeout(3000);
+// Wait for the second payment element to be visible and fetch its text
+await page.waitForSelector(secondPaymentSelector, { state: 'visible' });
+const secondPaymentText = await page.textContent(secondPaymentSelector);
 
-  console.log("Scrolling to 'See full description of work' link...");
-  await page.evaluate(() => {
-    const link = Array.from(document.querySelectorAll("a")).find(
-      (el) => el.textContent === "See full description of work"
-    );
-    if (link) {
-      link.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
+// Extract the numerical value from the second payment text
+const secondPaymentAmountMatches = secondPaymentText.match(/[\d,]+\.\d{2}/); // Match the currency format
+let secondPaymentAmount = secondPaymentAmountMatches ? parseFloat(secondPaymentAmountMatches[0].replace(/,/g, '')) : null; // Convert to float and handle commas
 
-  await page.waitForTimeout(3000);
+// Verification logic to check if the displayed second payment matches the expected 60% payment
+if (secondPaymentAmount && Math.abs(secondPaymentAmount - expectedSecondPaymentAmount) < 0.01) { // Allows for slight rounding differences
+  console.log(`Verification successful: The 60% second payment amount of $${secondPaymentAmount.toFixed(2)} matches the expected amount of $${expectedSecondPaymentAmount.toFixed(2)}.`.yellow);
+} else {
+  console.error(`Verification failed: The displayed second payment amount of $${secondPaymentAmount ? secondPaymentAmount.toFixed(2) : "N/A"} does not match the expected 60% payment amount of $${expectedSecondPaymentAmount.toFixed(2)}.`.yellow);
+}
 
-  await page.evaluate(() => {
-    const link = document.querySelector('a[href="/sow"]');
-    if (link) {
-      link.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
 
-  await page.waitForTimeout(2000);
 
-  await page.evaluate(() => {
-    const link = document.querySelector('a[href="/sow"]');
-    if (link) {
-      link.target = "_self";
-    }
-  });
+ // Assuming totalPrice has already been calculated
 
-  await page.click('a[href="/sow"]');
+// Calculate the expected 30% final payment from the total price
+const expectedFinalPaymentPercentage = 0.30;
+const expectedFinalPaymentAmount = totalPrice * expectedFinalPaymentPercentage;
 
-  console.log("Navigated to the 'See full description of work' page.");
+// Selector for the element containing the final payment amount
+const finalPaymentSelector = 'li.myAccount_paymentScheduleItem__EZLf8:has-text("30% upon completion")';
 
-  await page.waitForTimeout(3000);
+// Wait for the final payment element to be visible and fetch its text
+await page.waitForSelector(finalPaymentSelector, { state: 'visible' });
+const finalPaymentText = await page.textContent(finalPaymentSelector);
 
-  console.log("Scrolling to 'Tiger Paw Roof Deck Protection'...");
-  await page.evaluate(() => {
-    const section = [...document.querySelectorAll("p, h1, h2, h3, h4, h5, h6")] // Adjust the selectors as needed
-      .find((el) => el.textContent.includes("Tiger Paw Roof Deck Protection"));
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
+// Extract the numerical value from the final payment text
+const finalPaymentAmountMatches = finalPaymentText.match(/[\d,]+\.\d{2}/); // Match the currency format
+let finalPaymentAmount = finalPaymentAmountMatches ? parseFloat(finalPaymentAmountMatches[0].replace(/,/g, '')) : null; // Convert to float and handle commas
 
-  await page.waitForTimeout(3000);
+// Verification logic to check if the displayed final payment matches the expected 30% payment
+if (finalPaymentAmount && Math.abs(finalPaymentAmount - expectedFinalPaymentAmount) < 0.01) { // Allows for slight rounding differences
+  console.log(`Verification successful: The final payment amount of $${finalPaymentAmount.toFixed(2)} matches the expected amount of $${expectedFinalPaymentAmount.toFixed(2)}.`.yellow);
+} else {
+  console.error(`Verification failed: The displayed final payment amount of $${finalPaymentAmount ? finalPaymentAmount.toFixed(2) : "N/A"} does not match the expected final payment amount of $${expectedFinalPaymentAmount.toFixed(2)}.`.yellow);
+}
 
-  await page.evaluate(() => {
-    const exclusionsElement = [...document.querySelectorAll("strong")] // Adjust the selector as needed
-      .find((el) => el.textContent.includes("Exclusions:"));
-    if (exclusionsElement) {
-      exclusionsElement.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
 
-  await page.waitForTimeout(3000);
 
-  await page.goto("https://estimatorstg.gunnerroofing.com/my-account");
+// Fetch the total price text from the page and calculate the total price
+const totalPriceTexts = await page.textContent('p:has-text("Total:")');
+const totalPrices = parseFloat(totalPriceTexts.replace(/[^0-9.,]/g, "").replace(',', ''));
 
-  console.log("Returned to my account.");
+// Fetch all the payment items that have been marked as "(Paid)"
+const paidPaymentItems = await page.$$eval('.myAccount_paymentScheduleItem__EZLf8:has-text("(Paid)")', items =>
+  items.map(item => parseFloat(item.textContent.replace(/[^0-9.,]/g, "").replace(',', '')))
+);
 
-  await page.waitForTimeout(3000);
+// Calculate the total paid amount
+const totalPaid = paidPaymentItems.reduce((sum, current) => sum + current, 0);
 
-  console.log("Scrolling to 'Balance Remaining:'...");
-  await page.evaluate(() => {
-    const strongTags = Array.from(document.querySelectorAll("strong"));
-    const target = strongTags.find((el) =>
-      el.textContent.includes("Balance Remaining:")
-    );
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
+// Calculate the expected remaining balance
+const expectedRemainingBalance = totalPrices - totalPaid;
 
-  await page.waitForTimeout(3000);
+// Fetch the displayed remaining balance from the page
+const displayedRemainingBalanceText = await page.textContent('p:has-text("Balance Remaining:")');
+const displayedRemainingBalance = parseFloat(displayedRemainingBalanceText.replace(/[^0-9.,]/g, "").replace(',', ''));
 
-  console.log("Clicking on the 'Make Payment' button...");
-  const makePaymentButtonSelector = 'button:has-text("Make Payment")';
-  await page.waitForSelector(makePaymentButtonSelector, { state: "visible" });
-  await page.click(makePaymentButtonSelector);
+// Verification logic with a small margin for rounding errors
+const discrepancy = Math.abs(expectedRemainingBalance - displayedRemainingBalance);
+if (discrepancy < 0.01) { // Allowing for a penny difference
+    console.log(`Verification successful: The displayed balance remaining of $${displayedRemainingBalance.toFixed(2)} matches the expected balance remaining of $${expectedRemainingBalance.toFixed(2)}.`.yellow);
+} else {
+    console.error(`Verification failed: The displayed balance remaining of $${displayedRemainingBalance.toFixed(2)} does not match the expected balance remaining of $${expectedRemainingBalance.toFixed(2)}. The discrepancy is $${discrepancy.toFixed(2)}.`.yellow);
+}
 
-  await page.waitForTimeout(3000);
 
-  console.log("Scrolling to 'Selected add-ons:'...");
-  await page.evaluate(() => {
-    const pTag = document.querySelector(
-      "p.SelectionSummary_infoSubTitle__1V8ku"
-    );
-    if (pTag) {
-      pTag.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
+// Wait for the Make Payment button to be visible and click it
+await page.waitForSelector('.myAccount_makePaymentButton__984xT', { state: 'visible' });
+await Promise.all([
+  page.waitForNavigation(), // Wait for the page navigation to complete
+  page.click('.myAccount_makePaymentButton__984xT'), // Click the Make Payment button
+]);
 
-  await page.waitForTimeout(3000);
+// Verify the Make Payment page is displayed
+const isOnMakePaymentPage = await page.waitForSelector('h1:text("Make Payment")', { state: 'attached' });
+if (isOnMakePaymentPage) {
+    console.log('Verification successful: Navigated to the Make Payment page.'.yellow);
+} else {
+    console.error('Verification failed: Did not navigate to the Make Payment page.'.yellow);
+}
 
-  console.log("Scrolling to 'Preferred start date:'...");
-  await page.evaluate(() => {
-    const pTag = document.querySelector(
-      "p.SelectionSummary_infoSubTitle__1V8ku"
-    );
-    const preferredStartDateTag = Array.from(
-      document.querySelectorAll("p.SelectionSummary_infoSubTitle__1V8ku")
-    ).find((el) => el.textContent.includes("Preferred start date:"));
-    if (preferredStartDateTag) {
-      preferredStartDateTag.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    } else {
-      console.error("'Preferred start date:' p tag not found.");
-    }
-  });
 
-  await page.waitForTimeout(3000);
+// Selector for the paragraph you want to check
+const paragraphSelector = '.SelectionSummary_summaryParagragh__8hoZN';
 
-  await page.evaluate(() => {
-    const logOutLink = document.querySelector(
-      'a.nav-link[style*="cursor: pointer;"]'
-    );
-    if (logOutLink) {
-      logOutLink.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
+// Use the isVisible method to check if the element is visible
+const isParagraphVisible = await page.isVisible(paragraphSelector);
+
+if (isParagraphVisible) {
+  console.log("Customer name and address are correct.".yellow);
+} else {
+  console.log("Customer name and address are not correct.".yellow);
+}
+
+
+// Assume displayedRemainingBalance and expectedRemainingBalance are already defined as shown in previous examples
+
+// Fetch the displayed remaining balance text from the specific <h2> tag
+const displayedRemainingBalanceTexts = await page.textContent('h2:has-text("Remaining Balance:")');
+const displayedRemainingBalanceFromPage = parseFloat(displayedRemainingBalanceTexts.split('$')[1].replace(/,/g, ''));
+
+// Check if the displayed remaining balance matches the one we have (displayedRemainingBalance)
+if (displayedRemainingBalanceFromPage === displayedRemainingBalance) {
+    console.log(`Verification successful: The displayed balance remaining of $${displayedRemainingBalanceFromPage.toFixed(2)} matches the expected balance remaining of $${displayedRemainingBalance.toFixed(2)}.`.yellow);
+} else {
+    console.error(`Verification failed: The displayed balance remaining of $${displayedRemainingBalanceFromPage.toFixed(2)} does not match the expected balance remaining of $${displayedRemainingBalance.toFixed(2)}. The discrepancy is $${Math.abs(displayedRemainingBalanceFromPage - displayedRemainingBalance).toFixed(2)}.`.yellow);
+}
+
+
+// Calculate the expected 60% payment based on the total price
+const expectedNextPayment = totalPrice * 0.60;
+
+// Fetch the displayed next payment text from the specific <h3> tag
+const displayedNextPaymentText = await page.textContent('h3:has-text("Next Payment:")');
+const displayedNextPayment = parseFloat(displayedNextPaymentText.split('$')[1].replace(/,/g, ''));
+
+// Verification logic
+if (Math.abs(displayedNextPayment - expectedNextPayment) < 0.01) { // Allowing for a penny difference
+    console.log(`Verification successful: The next payment of $${displayedNextPayment.toFixed(2)} matches the expected 60% payment of $${expectedNextPayment.toFixed(2)}.`.yellow);
+} else {
+    console.error(`Verification failed: The next payment of $${displayedNextPayment.toFixed(2)} does not match the expected 60% payment of $${expectedNextPayment.toFixed(2)}. The discrepancy is $${Math.abs(displayedNextPayment - expectedNextPayment).toFixed(2)}.`.yellow);
+}
+
+
+
+// Selector for the radio button by its name, type, and value attributes
+const radioButtonSelector = 'input[name="paymentOption"][type="radio"][value="creditcard"]';
+
+// Check if the radio button is visible on the page
+const isRadioButtonVisible = await page.isVisible(radioButtonSelector);
+
+// Verification logic
+if (isRadioButtonVisible) {
+    console.log('Verification successful: The radio button for "Cash/Check/Credit Card" is present.'.yellow);
+} else {
+    console.error('Verification failed: The radio button for "Cash/Check/Credit Card" is not present.'.yellow);
+}
+
+
+// Assuming the color value is directly next to the "Color:" title in the DOM structure
+const colorInfoSelector = 'p.SelectionSummary_infoSubTitle__1V8ku';
+
+// Finding the element that contains "Color:" text
+const colorTitleElement = await page.$(colorInfoSelector);
+
+// Use JavaScript to navigate the DOM and find the actual color value
+const displayedRoofColor = await page.evaluate((el) => {
+  // Assuming the color value is in the next element
+  const nextElement = el.nextElementSibling;
+  return nextElement ? nextElement.textContent : null;
+}, colorTitleElement);
+
+// Your expected roof color
+const expectedRoofColors = "YourExpectedRoofColorHere";
+
+// Verification logic
+if (displayedRoofColor && displayedRoofColor.trim() === expectedRoofColors) {
+    console.log(`Verification successful: The displayed roof color "${displayedRoofColor}" matches the expected roof color "${expectedRoofColors}".`.yellow);
+} else {
+    console.error(`Verification failed: The displayed roof color "${displayedRoofColor}" does not match the expected roof color "${expectedRoofColors}".`.yellow);
+}
+
+
+
+
+
+  // Fetch all displayed add-on elements and their prices
+const addOnElements = await page.$$eval('.SelectionSummary_addonItem__SMI9D', (addOns) =>
+addOns.map((addOn) => {
+  // Assuming the add-on name is always present and the price is wrapped in a <span>
+  const name = addOn.textContent.replace(/\$\d+,\d+\.\d+$/, '').trim(); // Extract name by removing the price part
+  const priceText = addOn.querySelector('span') ? addOn.querySelector('span').textContent : ''; // Extract price
+  const price = parseFloat(priceText.replace(/[^\d.]/g, '')); // Convert price text to float for verification
+  return { name, priceText, price };
+})
+);
+
+// Verify each displayed add-on for proper formatting and positive price
+let verificationPassed = true;
+addOnElements.forEach(({ name, priceText, price }) => {
+if (name && priceText && !isNaN(price) && price > 0) {
+  console.log(`Verified: "${name}" with price ${priceText} is correctly formatted and displayed.`.yellow);
+} else {
+  console.error(`Verification failed: Add-on "${name}" with price ${priceText} is incorrectly formatted or displayed.`.yellow);
+  verificationPassed = false;
+}
+});
+
+// Final verification status
+if (verificationPassed) {
+console.log('All add-ons are correctly formatted and displayed.'.yellow);
+} else {
+console.log('Some add-ons are incorrectly formatted or not displayed as expected.'.yellow);
+}
+
+
+// Selector for the "See full description of work" link
+const linkSelectors = 'a[href="/sow"]:has-text("See full description of work")';
+
+// Check if the link is displayed on the page
+const isLinkVisible = await page.isVisible(linkSelectors);
+
+// Verify the link's presence and correctness
+if (isLinkVisible) {
+    console.log('Verification successful: The "See full description of work" link is displayed and correctly points to "/sow".'.yellow);
+} else {
+    console.error('Verification failed: The "See full description of work" link is either not displayed or does not correctly point to "/sow".'.yellow);
+}
+
+
+
+// Selector for the displayed start date
+const displayedStartDateSelector = 'p.SelectionSummary_infoDesc__HZv40';
+
+// Wait for the subtitle to ensure the section is loaded
+await page.waitForSelector(displayedStartDateSelector, { state: 'visible' });
+
+// Retrieve the displayed start date
+const displayedStartDate = await page.textContent(displayedStartDateSelector);
+
+// Check if the displayed start date matches the expected format (e.g., YYYY-MM-DD)
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+if (datePattern.test(displayedStartDate)) {
+    console.log(`Verification successful: The displayed start date "${displayedStartDate}" matches the expected format.`.yellow);
+} else {
+    console.error(`Verification failed: The displayed start date "${displayedStartDate}" does not match the expected format.`.yellow);
+}
+
+
+
 
   await page.waitForTimeout(3000);
 
   await page.click('a:has-text("Log Out")');
   console.log("Clicked on 'Log Out' link.");
 });
-
-module.exports = {
-  timeout: 360000,
-};
