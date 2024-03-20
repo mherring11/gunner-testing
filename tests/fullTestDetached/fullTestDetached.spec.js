@@ -1,6 +1,8 @@
 const { test, expect } = require("@playwright/test");
 const axios = require("axios");
 const colors = require("colors");
+const fs = require("fs").promises;
+const path = require("path");
 
 async function fetchDataFromSheet() {
   try {
@@ -12,20 +14,41 @@ async function fetchDataFromSheet() {
         },
       }
     );
-    console.log("Data fetched successfully:", response.data);
+    console.log("Data fetched successfully:".yellow, response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching data from sheet:", error);
+    console.error("Error fetching data from sheet:".yellow, error);
     return [];
   }
 }
 
-test.setTimeout(120000);
+async function readProjectIdsFromFile() {
+  const filePath = path.join(__dirname, "projectIds.json");
+  try {
+    const data = await fs.readFile(filePath, "utf8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error("Error reading project IDs from file:", error);
+    return [];
+  }
+}
+
+test.setTimeout(480000);
 test("Full Test Detached", async ({ browser }) => {
   const users = await fetchDataFromSheet();
+  const projectIds = await readProjectIdsFromFile();
 
-  for (const user of users) {
-    console.log(`Testing for user: ${user.userEmail}`);
+  for (let i = 0; i < users.length; i++) {
+    const user = users[i];
+    console.log(`Testing for user: ${user.userEmail}`.yellow);
+
+    const projectId = projectIds[i] ? projectIds[i].projectId : null;
+    if (!projectId) {
+      console.log(`No project ID found for user index: ${i}`.yellow);
+      continue;
+    }
+
+    console.log(`Using Project ID: ${projectId} for user: ${user.userEmail}`);
 
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -314,11 +337,15 @@ test("Full Test Detached", async ({ browser }) => {
       const updatedTotal = parseFloat(updatedTotalText.replace(/[^0-9.]/g, ""));
       console.log(`Updated total: $${updatedTotal}`.yellow);
 
-      expect(updatedTotal).toBeCloseTo(expectedNewTotal, 2);
-      console.log(
-        `Total has been correctly updated to: $${updatedTotal}`.yellow
-      );
-    } else {
+      try {
+        expect(updatedTotal).toBeCloseTo(expectedNewTotal, 2);
+        console.log(
+          `Total has been correctly updated to: $${updatedTotal}`.yellow
+        );
+      } catch (error) {
+        console.error(`Error in updated total assertion: ${error.message}`.red);
+       
+      }
       console.log(
         "The YES button is not visible, moving on without clicking.".yellow
       );

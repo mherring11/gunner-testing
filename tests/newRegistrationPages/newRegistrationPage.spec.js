@@ -1,6 +1,10 @@
 const { test, expect } = require("@playwright/test");
 const axios = require("axios");
 const colors = require("colors");
+const fs = require("fs").promises;
+const path = require("path");
+
+let projectIds = [];
 
 async function fetchDataFromSheet() {
   try {
@@ -40,7 +44,8 @@ async function selectStateAndAnswerQuestions(page, formData) {
     console.log("Confirmed: Insurance coverage set to 'Yes'.".yellow);
   } else {
     console.warn(
-      "Warning: Unable to confirm 'Yes' selection for insurance coverage.".yellow
+      "Warning: Unable to confirm 'Yes' selection for insurance coverage."
+        .yellow
     );
   }
 
@@ -100,28 +105,70 @@ async function registerUser(page, user) {
   console.log("Waiting on the 'Thank You' page...".yellow);
   await page.waitForTimeout(2000);
 
-  console.log(`Registration completed for user: ${user.userEmail}`.yellow);
+  await page.waitForNavigation({
+    url: "**/register/thank-you/?confirmation=GNR**",
+    timeout: 10000,
+  });
+
+  const currentPageUrl = page.url();
+  console.log(`Current Page URL: ${currentPageUrl}`);
+
+  const projectIdMatch = currentPageUrl.match(/confirmation=GNR(\d+)/);
+  const projectId = projectIdMatch ? projectIdMatch[1] : "Unknown";
+  const lastFiveDigits = projectId.length > 5 ? projectId.slice(-5) : projectId;
+
+  if (projectId !== "Unknown") {
+    console.log(`Project ID: ${lastFiveDigits} for ${user.streetAddress}`);
+    projectIds.push({ address: user.streetAddress, projectId: lastFiveDigits });
+  } else {
+    console.error(
+      "Failed to navigate to 'Thank You' page with project ID in URL.".yellow
+    );
+  }
+}
+
+async function saveProjectIdsToFile() {
+  const filePath = path.join(__dirname, "projectIds.json");
+  await fs.writeFile(filePath, JSON.stringify(projectIds, null, 2));
+  console.log("Project IDs saved to file.".yellow);
+
+  const saveProjectIds = async (folderName) => {
+    const baseDir = path.join(__dirname, '..', folderName);
+    await fs.mkdir(baseDir, { recursive: true }); 
+    const filePath = path.join(baseDir, "projectIds.json");
+    await fs.writeFile(filePath, JSON.stringify(projectIds, null, 2)); 
+    console.log(`Project IDs saved to ${filePath}.`.yellow);
+  };
+  
+  const folderPaths = ["fullTestDetached", "admin", "newRegistrationPages"];
+  await Promise.all(
+    folderPaths.map((folderPath) => saveProjectIds(folderPath))
+  );
 }
 
 test("bulk registration with API data", async ({ page }) => {
   test.setTimeout(180000);
   const users = await fetchDataFromSheet();
-  
+
   if (users.length > 0) {
     for (let i = 0; i < users.length; i++) {
       await registerUser(page, users[i]);
-      
+
       if (i < users.length - 1) {
-        console.log("Navigating back to the registration page for the next user...".yellow);
+        console.log(
+          "Navigating back to the registration page for the next user...".yellow
+        );
         await page.goto("https://staging.gunnerroofing.com/register/");
       } else {
-        console.log("Staying on the 'Thank You' page for the last user.".yellow);
-        
-        await page.waitForTimeout(2000);
+        console.log(
+          "Staying on the 'Thank You' page for the last user.".yellow
+        );
       }
     }
-    console.log("All users registered successfully.".yellow);
+
+    await saveProjectIdsToFile();
+    console.log("All users registered successfully.");
   } else {
-    console.log("No users to register.".yellow);
+    console.log("No users to register.");
   }
 });

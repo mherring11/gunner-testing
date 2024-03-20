@@ -1,8 +1,6 @@
 const { test, expect } = require("@playwright/test");
 const axios = require("axios");
 const colors = require("colors");
-const fs = require("fs").promises;
-const path = require("path");
 
 async function fetchDataFromSheet() {
   try {
@@ -14,41 +12,20 @@ async function fetchDataFromSheet() {
         },
       }
     );
-    console.log("Data fetched successfully:".yellow, response.data);
+    console.log("Data fetched successfully:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching data from sheet:".yellow, error);
+    console.error("Error fetching data from sheet:", error);
     return [];
   }
 }
 
-async function readProjectIdsFromFile() {
-  const filePath = path.join(__dirname, "projectIds.json");
-  try {
-    const data = await fs.readFile(filePath, "utf8");
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("Error reading project IDs from file:", error);
-    return [];
-  }
-}
-
-test.setTimeout(480000);
-test("Full Test Detached", async ({ browser }) => {
+test.setTimeout(120000);
+test("Admin Regular Full", async ({ browser }) => {
   const users = await fetchDataFromSheet();
-  const projectIds = await readProjectIdsFromFile();
 
-  for (let i = 0; i < users.length; i++) {
-    const user = users[i];
-    console.log(`Testing for user: ${user.userEmail}`.yellow);
-
-    const projectId = projectIds[i] ? projectIds[i].projectId : null;
-    if (!projectId) {
-      console.log(`No project ID found for user index: ${i}`.yellow);
-      continue;
-    }
-
-    console.log(`Using Project ID: ${projectId} for user: ${user.userEmail}`);
+  for (const user of users) {
+    console.log(`Testing for user: ${user.userEmail}`);
 
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -337,15 +314,11 @@ test("Full Test Detached", async ({ browser }) => {
       const updatedTotal = parseFloat(updatedTotalText.replace(/[^0-9.]/g, ""));
       console.log(`Updated total: $${updatedTotal}`.yellow);
 
-      try {
-        expect(updatedTotal).toBeCloseTo(expectedNewTotal, 2);
-        console.log(
-          `Total has been correctly updated to: $${updatedTotal}`.yellow
-        );
-      } catch (error) {
-        console.error(`Error in updated total assertion: ${error.message}`.red);
-       
-      }
+      expect(updatedTotal).toBeCloseTo(expectedNewTotal, 2);
+      console.log(
+        `Total has been correctly updated to: $${updatedTotal}`.yellow
+      );
+    } else {
       console.log(
         "The YES button is not visible, moving on without clicking.".yellow
       );
@@ -836,29 +809,29 @@ test("Full Test Detached", async ({ browser }) => {
       console.log("Failed to access the iframe content.".yellow);
     }
 
-    const iframeElementHandle = await page.waitForSelector(
-      'iframe[src*="https://jstest.authorize.net"]',
-      { state: "attached" }
-    );
-    const framess = await iframeElementHandle.contentFrame();
-    if (framess) {
-      try {
-        await framess.waitForSelector("button#payButton", {
-          state: "visible",
-          timeout: 5000,
-        });
-        await framess.click("button#payButton");
-        console.log("Clicked 'Submit Payment' button.".yellow);
-      } catch (error) {
-        console.error("Error clicking 'Submit Payment':".yellow, error);
-      }
-    } else {
-      console.log(
-        "The iframe is detached or the frame reference is invalid.".yellow
-      );
-    }
+    // const iframeElementHandle = await page.waitForSelector(
+    //   'iframe[src*="https://jstest.authorize.net"]',
+    //   { state: "attached" }
+    // );
+    // const framess = await iframeElementHandle.contentFrame();
+    // if (framess) {
+    //   try {
+    //     await framess.waitForSelector("button#payButton", {
+    //       state: "visible",
+    //       timeout: 5000,
+    //     });
+    //     await framess.click("button#payButton");
+    //     console.log("Clicked 'Submit Payment' button.".yellow);
+    //   } catch (error) {
+    //     console.error("Error clicking 'Submit Payment':".yellow, error);
+    //   }
+    // } else {
+    //   console.log(
+    //     "The iframe is detached or the frame reference is invalid.".yellow
+    //   );
+    // }
 
-    console.log("Completed the payment process.".yellow);
+    // console.log("Completed the payment process.".yellow);
 
     await page.waitForSelector(
       "#quoteConfirmation_resultBtn__OshVM a.MuiButtonBase-root",
@@ -1783,6 +1756,31 @@ test("Full Test Detached", async ({ browser }) => {
     await page.click('a:has-text("Log Out")');
     console.log("Clicked on 'Log Out' link.".yellow);
 
-    await context.close();
+    await page.goto(
+      "https://apistg.gunnerroofing.com/wp-login.php?loggedout=true&wp_lang=en_US"
+    );
+
+    const loginFormVisible = await page.isVisible("form#loginform");
+    console.log("Checking if login form is visible:".yellow, loginFormVisible);
+    expect(loginFormVisible).toBeTruthy();
+
+    console.log("Filling in the username...".yellow);
+    await page.fill("#user_login", "mherring@clickherelabs.com");
+
+    console.log("Filling in the password...".yellow);
+    await page.fill("#user_pass", "MnSJune07!BTMJ");
+
+    console.log("Submitting the login form...".yellow);
+    await page.click("#wp-submit");
+
+    console.log("Navigating to 'Estimator Admin'...".yellow);
+    await page.click('text="Estimator Admin"');
+
+    console.log("Going to the projects page...".yellow);
+    await page.click(
+      'a[href="admin.php?page=ge-settings&view=projects&status=unpaid"]'
+    );
+
+    // await context.close();
   }
 });
