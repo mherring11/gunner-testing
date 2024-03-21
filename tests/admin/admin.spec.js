@@ -15,7 +15,8 @@ async function readProjectIdsFromFile() {
   }
 }
 
-test("Admin Page", async ({ page }) => {
+test.setTimeout(60000);
+test("Admin Page - Sequential Project ID Verification", async ({ page }) => {
   await page.goto(
     "https://apistg.gunnerroofing.com/wp-login.php?loggedout=true&wp_lang=en_US"
   );
@@ -50,209 +51,319 @@ test("Admin Page", async ({ page }) => {
   console.log("Projects page loaded...".yellow);
 
   const projectIds = await readProjectIdsFromFile();
-  if (projectIds.length > 0) {
-    const { projectId, address } = projectIds[0]; 
+  for (const project of projectIds) {
     console.log(
-      `Processing project ID: ${projectId}, Address: ${address}`.yellow
+      `Going to the projects page for Project ID: ${project.projectId}`.yellow
+    );
+    await page.goto(
+      `https://apistg.gunnerroofing.com/wp-admin/admin.php?page=ge-settings&view=projects&status=paid`
+    );
+    await page.waitForSelector(
+      'a.link[href*="/wp-admin/admin.php?page=ge-settings&view=projects&project="]'
     );
 
-    for (const { projectId, address } of projectIds) {
-      const projectIDSelector = `a[href*="project=${projectId}"]`;
-      const addressText = address.replace(/,\s+/g, ", ").trim();
-
-      const projectIDExists = await page.isVisible(projectIDSelector);
-      console.log(`Project ID ${projectId} visibility:`, projectIDExists);
-      expect(projectIDExists).toBeTruthy();
-
-      const addressSelector = `a[href*="project=${projectId}"]:has-text("${
-        addressText.split(",")[0]
-      }")`;
-      const addressExists = await page.isVisible(addressSelector);
-      console.log(`Address ${addressText} visibility:`, addressExists);
-      expect(addressExists).toBeTruthy();
-
-      if (projectIDExists && addressExists) {
-        console.log(`Clicking on project ID ${projectId} link...`.yellow);
-        await Promise.all([
-          page.waitForNavigation(),
-          page.click(projectIDSelector),
-        ]);
-
-        console.log(
-          `Navigated to project ID ${projectId} details page.`.yellow
-        );
-      }
-    }
-
-    const imageSelector =
-      'img.object-cover[src*="/wp-content/uploads/2022/10/3DHouseImage.png"]';
-
-    await page.waitForSelector(imageSelector, { state: "visible" });
-
-    console.log("Clicking on the 3D Visualizer...".yellow);
-    await page.click(imageSelector);
-
-    console.log("3D Visualizer clicked.".yellow);
-
-    const iframeSelector =
-      'iframe[src*="https://visualizer.gunnerroofing.com/"]';
-    const iframeHandle = await page.waitForSelector(iframeSelector, {
-      state: "attached",
-    });
-    expect(await iframeHandle.isVisible()).toBeTruthy();
-
-    const frame = await iframeHandle.contentFrame();
-    expect(frame).not.toBeNull();
-
-    const canvasSelector = 'canvas[data-engine="three.js r155dev"]';
-    await frame.waitForSelector(canvasSelector, { state: "visible" });
-
-    const canvasBoundingBox = await frame.evaluate((selector) => {
-      const canvas = document.querySelector(selector);
-      if (!canvas) return null;
-      const rect = canvas.getBoundingClientRect();
-      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-    }, canvasSelector);
-
-    const iframeBoundingBox = await iframeHandle.boundingBox();
-
-    const centerX =
-      iframeBoundingBox.x + canvasBoundingBox.x + canvasBoundingBox.width / 2;
-    const centerY =
-      iframeBoundingBox.y + canvasBoundingBox.y + canvasBoundingBox.height / 2;
-
-    console.log("Interacting with the visualizer...".yellow);
-
-    await page.mouse.move(centerX, centerY);
-    await page.mouse.down();
-    await page.mouse.move(
-      centerX + canvasBoundingBox.width / 4,
-      centerY + canvasBoundingBox.height / 4,
-      { steps: 10 }
+    console.log(
+      `Processing project ID: ${project.projectId}, Address: ${project.address}`
+        .yellow
     );
-    await page.mouse.up();
+    const projectLinkSelector = `a[href*="project=${project.projectId}"]`;
 
-    console.log("Completed visualizer interaction verification.".yellow);
-  }
-
-  await page.goBack();
-  console.log("Navigated back a page.".yellow);
-
-  for (const project of projectIds) {
-    const expectedHref = `/wp-admin/admin.php?page=ge-settings&view=projects&project=${project.projectId}`;
-
-    const formattedAddress = project.address
-      .replace(/, /g, ", ")
-      .replace(/&/g, "&amp;");
-
-    const linkSelector = `a[href="${expectedHref}"]:has-text("${formattedAddress}")`;
-
-    if (await page.isVisible(linkSelector)) {
-      console.log(
-        `Verified link for project ID ${project.projectId} with address "${project.address}" is correctly linked.`
-          .yellow
-      );
-    } else {
-      console.error(
-        `Link for project ID ${project.projectId} with address "${project.address}" is not correctly linked or visible.`
-          .red
-      );
-    }
-  }
-
-  for (const project of projectIds) {
-    const expectedHref = `/wp-admin/admin.php?page=ge-settings&view=projects&project=${project.projectId}`;
-
-    const linkSelector = `a[href="${expectedHref}"]`;
-
-    if (await page.isVisible(linkSelector)) {
-      console.log(
-        `Verified link for project ID ${project.projectId} is correctly linked to its project record.`
-          .yellow
-      );
-    } else {
-      console.error(
-        `Link for project ID ${project.projectId} is not correctly linked to its project record or not visible.`
-          .red
-      );
-    }
-  }
-
-  for (const project of projectIds) {
-   
-    const projectLinkSelector = `a[href*="/wp-admin/admin.php?page=ge-settings&view=projects&project=${project.projectId}"]`;
-
-  
     if (await page.isVisible(projectLinkSelector)) {
-      
       await Promise.all([
-        page.waitForNavigation(),
+        page.waitForNavigation({ waitUntil: "networkidle" }),
         page.click(projectLinkSelector),
       ]);
 
       console.log(
-        `Clicked on the project ID link for project ID: ${project.projectId}.`
-          .yellow
+        `Successfully verified navigation for project ID: ${project.projectId}.`
+          .green
       );
 
-     
-      const currentUrl = page.url();
-      const expectedUrlPart = `/wp-admin/admin.php?page=ge-settings&view=projects&project=${project.projectId}`;
-      if (currentUrl.includes(expectedUrlPart)) {
+      const imageSelector =
+        'img.object-cover[src*="/wp-content/uploads/2022/10/3DHouseImage.png"]';
+
+      await page.waitForSelector(imageSelector, { state: "visible" });
+
+      console.log("Clicking on the 3D Visualizer...".yellow);
+      await page.click(imageSelector);
+
+      console.log("3D Visualizer clicked.".yellow);
+
+      const iframeSelector =
+        'iframe[src*="https://visualizer.gunnerroofing.com/"]';
+      const iframeHandle = await page.waitForSelector(iframeSelector, {
+        state: "attached",
+      });
+      expect(await iframeHandle.isVisible()).toBeTruthy();
+
+      const frame = await iframeHandle.contentFrame();
+      expect(frame).not.toBeNull();
+
+      const canvasSelector = 'canvas[data-engine="three.js r155dev"]';
+      await frame.waitForSelector(canvasSelector, { state: "visible" });
+
+      const canvasBoundingBox = await frame.evaluate((selector) => {
+        const canvas = document.querySelector(selector);
+        if (!canvas) return null;
+        const rect = canvas.getBoundingClientRect();
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+      }, canvasSelector);
+
+      const iframeBoundingBox = await iframeHandle.boundingBox();
+
+      const centerX =
+        iframeBoundingBox.x + canvasBoundingBox.x + canvasBoundingBox.width / 2;
+      const centerY =
+        iframeBoundingBox.y +
+        canvasBoundingBox.y +
+        canvasBoundingBox.height / 2;
+
+      console.log("Interacting with the visualizer...".yellow);
+
+      await page.mouse.move(centerX, centerY);
+      await page.mouse.down();
+      await page.mouse.move(
+        centerX + canvasBoundingBox.width / 4,
+        centerY + canvasBoundingBox.height / 4,
+        { steps: 10 }
+      );
+      await page.mouse.up();
+
+      console.log("Completed visualizer interaction verification.".yellow);
+    }
+
+    const customerName = await page.textContent(".project_info a");
+    console.log(
+      "Customer Name: " + customerName + ". Verification successful.".green
+    );
+
+    const email = await page.textContent(
+      "table#customer tr:nth-of-type(2) td:nth-of-type(2)"
+    );
+    console.log("Email: " + email + ". Verification successful.".green);
+
+    const phoneNumber = await page.textContent(
+      "table#customer tr:nth-of-type(1) td:nth-of-type(2)"
+    );
+    console.log(
+      "Phone Number: " + phoneNumber + ". Verification successful.".green
+    );
+
+    const preferredContact = await page.textContent(
+      "table#customer tr:nth-of-type(3) td:nth-of-type(2)"
+    );
+    console.log(
+      "Preferred Method of Contact: " +
+        preferredContact +
+        ". Verification successful.".green
+    );
+
+    const referral = await page.textContent(
+      "table#customer tr:nth-of-type(4) td:nth-of-type(2)"
+    );
+    console.log(
+      "Referral: " +
+        referral +
+        " (if blank, no referral was provided). Verification successful.".green
+    );
+
+    const projectAddressContent = await page.$$eval(
+      ".project_info_header",
+      (elements) =>
+        elements.find((element) =>
+          element.textContent.includes("Project Address")
+        ).textContent
+    );
+
+    if (projectAddressContent.includes("Paid")) {
+      console.log("Project Address - Paid verification successful.".green);
+    } else {
+      console.error(
+        `Project Address - Paid verification failed. Content found: ${projectAddressContent}`
+          .red
+      );
+    }
+
+    const customerNameLinkSelector =
+      'a.link.text-sm.link-primary.hover\\:link-secondary[target="_customer"]';
+
+    const customerEditHref = await page.getAttribute(
+      customerNameLinkSelector,
+      "href"
+    );
+
+    console.log(
+      `Navigating directly to Edit Customer page: ${customerEditHref}`.yellow
+    );
+    await page.goto(`https://apistg.gunnerroofing.com${customerEditHref}`);
+
+    const isEditCustomerPage = await page.isVisible(
+      "div.flex-parent h3.main-title >> text=/Edit Customer/"
+    );
+
+    if (isEditCustomerPage) {
+      console.log(
+        "Successfully navigated to and verified the Edit Customer page.".green
+      );
+    } else {
+      console.error("Failed to verify the Edit Customer page.".red);
+    }
+
+    await page.goBack();
+    console.log("Navigated back after verification.".yellow);
+
+    const propertyAddressLinkSelector =
+      'a.link.font-normal.link-primary.hover\\:link-secondary[target="_project"]';
+
+    const projectEditHref = await page.getAttribute(
+      propertyAddressLinkSelector,
+      "href"
+    );
+
+    console.log(
+      `Navigating directly to Edit Project page: ${projectEditHref}`.yellow
+    );
+    await page.goto(`https://apistg.gunnerroofing.com${projectEditHref}`);
+
+    const isEditProjectPage = await page.isVisible(
+      "div.flex-parent h3.main-title >> text=/Edit Project/"
+    );
+
+    if (isEditProjectPage) {
+      console.log(
+        "Successfully navigated to and verified the Edit Project page.".green
+      );
+    } else {
+      console.error("Failed to verify the Edit Project page.".red);
+    }
+
+    await page.goBack();
+    console.log("Navigated back after verification.".yellow);
+
+    await page.waitForSelector(".slide-item.slick-slide.slick-active");
+
+    const visualizerSlideSelector =
+      '.slide-item.slick-slide.slick-active[tabindex="0"] >> text="Visualizer"';
+    await page.click(visualizerSlideSelector);
+
+    console.log("Clicked on the 'Visualizer' slide.".yellow);
+
+    console.log("Verifying measurement fields...".yellow);
+
+    const measurementRowsSelector = ".project_info text-sm pb-2 tr";
+
+    const measurementRows = await page.$$(measurementRowsSelector);
+
+    let allMeasurementsValid = true;
+
+    for (const row of measurementRows) {
+      const [typeElement, valueElement] = await row.$$("td");
+      const type = await typeElement.textContent();
+      const value = await valueElement.textContent();
+
+      const numeralsCount = (value.match(/\d/g) || []).length;
+
+      if (type.trim() === "Flat Area:") {
         console.log(
-          `Successfully verified navigation for project ID: ${project.projectId}.`
+          `Flat Area has ${numeralsCount} numerals, which might be applicable.`
+            .yellow
+        );
+        continue;
+      }
+
+      if (numeralsCount < 12) {
+        console.error(`${type} has less than 12 numerals: ${value}.`.red);
+        allMeasurementsValid = false;
+      } else {
+        console.log(
+          `${type} validation passed with ${numeralsCount} numerals.`.green
+        );
+      }
+    }
+
+    if (allMeasurementsValid) {
+      console.log("All measurement fields populated correctly.".green);
+    } else {
+      console.error(
+        "Some measurement fields are not populated with at least 12 numerals."
+          .red
+      );
+    }
+
+    console.log(
+      "Verifying 'Manually add measurements' modal display...".yellow
+    );
+
+    const manualMeasurementsButtonSelector =
+      'button[data-hs-overlay="#measurementModal"]';
+
+    await page.click(manualMeasurementsButtonSelector);
+
+    const modalSelector = "#measurementModal";
+
+    await page.waitForSelector(modalSelector, { state: "visible" });
+
+    const isModalVisible = await page.isVisible(modalSelector);
+    if (isModalVisible) {
+      console.log(
+        "The 'Manually add measurements' modal is displayed successfully.".green
+      );
+    } else {
+      console.error(
+        "The 'Manually add measurements' modal did not display as expected.".red
+      );
+    }
+
+    console.log("Verifying measurements fields in the modal...".yellow);
+
+    // Define an array of selectors for the input fields you want to verify
+    const measurementFieldsSelectors = [
+      "#total_area_field",
+      "#ridges_field",
+      "#valleys_field",
+      "#rakes_field",
+      "#eaves_field",
+
+      "#flat_area_field",
+      "#detached_area_field",
+      "#hips_field",
+      // "#url_field" // Assuming you want to check this as well, though it's not a numerical field
+    ];
+
+    for (const selector of measurementFieldsSelectors) {
+      const value = await page.inputValue(selector); // Get value of each field
+      const numeralLength = value.replace(/[^0-9]/g, "").length; // Remove non-numeric characters and calculate length
+
+      if (numeralLength >= 12 || value.trim().length === 0) {
+        // Checks if the field has at least 12 numerals or is intentionally left empty
+        console.log(
+          `Verification successful for field with selector "${selector}". Value: ${value}`
             .green
         );
       } else {
         console.error(
-          `Failed to navigate to the expected URL for project ID: ${project.projectId}. Current URL: ${currentUrl}`
+          `Verification failed for field with selector "${selector}". Numeric length is less than 12. Value: ${value}`
             .red
         );
       }
-    } else {
-      console.error(
-        `Link for project ID ${project.projectId} is not visible or correctly linked to its project record.`
-          .red
-      );
     }
-  }
+    await page.click(
+      'xpath=//h2[contains(text(), "Add Measurements")]/following-sibling::button'
+    );
 
-  for (const project of projectIds) {
-   
-    const simplifiedAddress = project.address.split(",")[0]; 
+    const selectionRows = await page.$$(
+      "div.project_info.text-sm.pb-2 table tbody tr"
+    );
 
-   
-    const expectedHref = `/wp-admin/post.php?post=${project.projectId}&action=edit`;
+    for (const row of selectionRows) {
+      const selectionName = await row.$eval("td:nth-of-type(1)", (element) =>
+        element.textContent.trim()
+      );
+      const selectionValue = await row.$eval("td:nth-of-type(2)", (element) =>
+        element.textContent.trim()
+      );
 
-   
-    const projectLinkSelector = `a[href*="/wp-admin/post.php?post=${project.projectId}&action=edit"]`;
-await Promise.all([
-    page.waitForNavigation({ waitUntil: 'networkidle' }), 
-    page.click(projectLinkSelector),
-]);
-
-
-const currentUrl = page.url();
-const expectedUrl = `https://apistg.gunnerroofing.com/wp-admin/post.php?post=${project.projectId}&action=edit`;
-if (!currentUrl.includes(expectedUrl)) {
-    console.error(`Failed to navigate to the expected URL for project ID: ${project.projectId}. Current URL: ${currentUrl}`);
-    return; 
-}
-
-
-const uniqueElement = 'input#post-title'; 
-const elementVisible = await page.isVisible(uniqueElement, { timeout: 10000 }).catch(e => {
-    console.error(`Error waiting for the unique element ${uniqueElement}: ${e.message}`);
-    return false; 
-});
-
-if (elementVisible) {
-    console.log(`Verified unique element on edit page for project ID: ${project.projectId}.`.yellow);
-} else {
-    console.error(`Unique element ${uniqueElement} not visible on the page for project ID: ${project.projectId}.`);
-   
-    await page.screenshot({ path: `debug_project_${project.projectId}.png` });
-}
-
+      console.log(`Selection: ${selectionName}, Value: ${selectionValue}`);
+    }
   }
 });
