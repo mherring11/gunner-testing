@@ -34,7 +34,7 @@ async function readProjectIdsFromFile() {
 }
 
 test.setTimeout(480000);
-test("Full Test Detached", async ({ browser }) => {
+test("Full Test", async ({ browser }) => {
   const users = await fetchDataFromSheet();
   const projectIds = await readProjectIdsFromFile();
 
@@ -312,16 +312,39 @@ test("Full Test Detached", async ({ browser }) => {
       );
     }
 
+    const yesButtonSelectorFlatRoof =
+      '#result_flatRoof__xPWIq button[value="YES"]';
+
+    await page.click(yesButtonSelectorFlatRoof);
+    console.log('"YES" button clicked for flat roof replacement.');
+
+    await page.waitForFunction(
+      (selector) =>
+        document.querySelector(selector).getAttribute("aria-pressed") ===
+        "true",
+      yesButtonSelectorFlatRoof
+    );
+    console.log('"YES" button state verified as selected.');
+
+    const yesButtonSelectorForDetachedStructure =
+      '#result_detachedStructure__UPrzP button[value="YES"][aria-pressed="false"]';
+
     const yesButtonVisible = await page.isVisible(
-      'button[value="YES"][aria-pressed="false"]'
+      yesButtonSelectorForDetachedStructure
     );
 
     if (yesButtonVisible) {
-      await page.click('button[value="YES"][aria-pressed="false"]');
+      await page.click(yesButtonSelectorForDetachedStructure);
 
-      await expect(page.locator('button[value="YES"]')).toHaveAttribute(
-        "aria-pressed",
-        "true"
+      await expect(
+        page.locator(yesButtonSelectorForDetachedStructure)
+      ).toHaveAttribute("aria-pressed", "true");
+      console.log(
+        '"YES" button for additional structures has been successfully clicked and verified as selected.'
+      );
+    } else {
+      console.log(
+        '"YES" button for additional structures is either not visible or already selected.'
       );
 
       const additionalCostText = await page.textContent(

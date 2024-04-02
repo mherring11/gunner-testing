@@ -140,7 +140,7 @@ async function saveProjectIdsToFile() {
     console.log(`Project IDs saved to ${filePath}.`.yellow);
   };
   
-  const folderPaths = ["fullTestDetached", "admin", "newRegistrationPages"];
+  const folderPaths = ["admin", "newRegistrationPages", "fullTest"];
   await Promise.all(
     folderPaths.map((folderPath) => saveProjectIds(folderPath))
   );
