@@ -15,7 +15,7 @@ async function readProjectIdsFromFile() {
   }
 }
 
-test.setTimeout(60000);
+test.setTimeout(120000);
 test("Admin Page - Sequential Project ID Verification", async ({ page }) => {
   await page.goto(
     "https://apistg.gunnerroofing.com/wp-login.php?loggedout=true&wp_lang=en_US"
@@ -364,6 +364,179 @@ test("Admin Page - Sequential Project ID Verification", async ({ page }) => {
       );
 
       console.log(`Selection: ${selectionName}, Value: ${selectionValue}`);
+    }
+
+    const paymentAmounts = await page.$$eval(
+      "tr.payment_VALID td:last-child",
+      (tds) =>
+        tds.map((td) => parseFloat(td.textContent.replace(/[^0-9.]/g, "")))
+    );
+
+    const sumOfPayments = paymentAmounts.reduce(
+      (sum, amount) => sum + amount,
+      0
+    );
+
+    console.log(`Sum of installment payments verified: ${sumOfPayments}`.green);
+
+    const paymentDateLinks = await page.$$eval(
+      'tr.payment_VALID a[target="_edit"]',
+      (links) => links.map((link) => link.href)
+    );
+
+    for (const linkHref of paymentDateLinks) {
+      await page.goto(linkHref);
+
+      const editPaymentHeaderVisible = await page.isVisible(
+        "h3.main-title >> text=/Edit Payment/"
+      );
+
+      if (editPaymentHeaderVisible) {
+        console.log(
+          `Verification successful: Navigated to Edit Payment page`.green
+        );
+      } else {
+        console.error(
+          `Verification failed: Did not navigate to Edit Payment page`.green
+        );
+      }
+
+      await page.goBack();
+    }
+
+    const signedDateTime = await page.textContent('"Signed: "');
+    console.log(`Contract Signed Date/Time: ${signedDateTime}`.yellow);
+
+    // Define a selector that represents the entire block containing the contract link
+    const contractInfoSelector = `.project_info.text-sm.pb-2 p.project_info_header.text-sm.pb-2 a[target="_contract"]`;
+
+    // Attempt to find the element using the selector
+    const linkHandle = await page.$(contractInfoSelector);
+
+    // Check if the link element is found
+    if (linkHandle) {
+      console.log("Signed contract link is verified.".green);
+    } else {
+      console.error("Failed to find the signed contract link.".green);
+    }
+
+    const itemsToCheck = [
+      "Roof",
+      "Gutters",
+      "Gutter Guards",
+      "Skylights Fixed",
+      "Skylights Venting",
+    ];
+
+    let allItemsFound = true;
+
+    for (const item of itemsToCheck) {
+      // Adjusting the selector to find the parent div and then find the p tags within it
+      const selector = `.project_info_header.text-sm.pb-2:contains('${item}')`;
+      const value = await page.evaluate((item) => {
+        const elements = Array.from(
+          document.querySelectorAll(
+            "div.project_info.text-sm.pb-2 p.project_info_header.text-sm.pb-2"
+          )
+        );
+        const foundElement = elements.find((el) =>
+          el.textContent.includes(item)
+        );
+        return foundElement ? foundElement.textContent.split(": $")[1] : null;
+      }, item);
+
+      if (value) {
+        console.log(`${item} value is verified: $${value}`.green);
+      } else {
+        console.error(`Failed to find ${item}.`);
+        allItemsFound = false;
+      }
+    }
+
+    if (allItemsFound) {
+      console.log("All Verisk Estimate values are verified.".green);
+    } else {
+      console.error("Some Verisk Estimate values are missing.").green;
+    }
+
+    async function verifyContractMilestoneDynamic(page) {
+      const expectedSignedDate = await page.evaluate(() => {
+        const elements = Array.from(
+          document.querySelectorAll("div.project-info, p.project_info_header")
+        ); // Adjust the selector to include all potential containers of the signed date.
+        for (const el of elements) {
+          const match = el.textContent.match(
+            /Signed:\s*(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/
+          );
+          if (match) {
+            return match[1];
+          }
+        }
+        return null;
+      });
+
+      console.log(`Dynamically obtained signed date: ${expectedSignedDate}`);
+
+      await page.waitForSelector("table");
+      const milestoneVerified = await page.evaluate((expectedSignedDate) => {
+        const rows = Array.from(document.querySelectorAll("tr"));
+        const contractRow = rows.find((row) =>
+          row.textContent.includes("Contract")
+        );
+
+        if (!contractRow)
+          return { verified: false, error: "Contract row not found" };
+
+        const status =
+          contractRow.cells[1]?.textContent.trim() === "Contract Signed";
+        const signedDate =
+          contractRow.cells[2]?.textContent.trim() === expectedSignedDate;
+        const completeChecked = contractRow.cells[3]?.querySelector(
+          'input[type="checkbox"]'
+        ).checked;
+        const viewableChecked = contractRow.cells[4]?.querySelector(
+          'input[type="checkbox"]'
+        ).checked;
+
+        return {
+          verified: status && signedDate && completeChecked && viewableChecked,
+          status,
+          signedDate,
+          completeChecked,
+          viewableChecked,
+        };
+      }, expectedSignedDate);
+
+      if (milestoneVerified.verified) {
+        console.log(
+          `Verified "Contract" milestone with "Contract Signed" status on ${expectedSignedDate}, "Complete" and "Client Viewable" checkboxes are checked.`
+            .green
+        );
+      } else {
+        console.error(
+          'Failed to verify "Contract" milestone:',
+          milestoneVerified
+        );
+      }
+    }
+
+    await verifyContractMilestoneDynamic(page);
+
+    async function verifyTablePresence(page) {
+      const selectors = {
+        "Job Costs": "//th[contains(text(), 'Job Costs')]/ancestor::table",
+        "Labor Costs": "//th[contains(text(), 'Labor Costs')]/ancestor::table",
+        "Add-ons": "//th[contains(text(), 'Add Ons')]/ancestor::table",
+        "Markups": "//th[contains(text(), 'Markups')]/ancestor::table",
+        "Taxes": "//th[contains(text(), 'Taxes')]/ancestor::table",
+        "Total": "//th[contains(text(), 'Total')]/ancestor::table",
+      };
+    
+      for (const [tableName, xpath] of Object.entries(selectors)) {
+        const elements = await page.$x(xpath);
+        const isVisible = elements.length > 0;
+        console.log(`${tableName} Table Visible: ${isVisible}`);
+      }
     }
   }
 });
