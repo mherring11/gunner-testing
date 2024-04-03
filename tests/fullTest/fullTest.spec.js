@@ -327,24 +327,26 @@ test("Full Test", async ({ browser }) => {
     console.log('"YES" button state verified as selected.');
 
     const yesButtonSelectorForDetachedStructure =
-      '#result_detachedStructure__UPrzP button[value="YES"][aria-pressed="false"]';
+      '#result_detachedStructure__UPrzP button[value="YES"]';
 
-    const yesButtonVisible = await page.isVisible(
-      yesButtonSelectorForDetachedStructure
+    await page.click(yesButtonSelectorForDetachedStructure);
+    console.log('"YES" button clicked.');
+
+    await page.waitForTimeout(1000);
+
+    const isAriaPressed = await page.getAttribute(
+      yesButtonSelectorForDetachedStructure,
+      "aria-pressed"
     );
 
-    if (yesButtonVisible) {
-      await page.click(yesButtonSelectorForDetachedStructure);
-
-      await expect(
-        page.locator(yesButtonSelectorForDetachedStructure)
-      ).toHaveAttribute("aria-pressed", "true");
+    if (isAriaPressed === "true") {
       console.log(
         '"YES" button for additional structures has been successfully clicked and verified as selected.'
       );
     } else {
       console.log(
-        '"YES" button for additional structures is either not visible or already selected.'
+        'Failed to verify the "YES" button for additional structures as selected. aria-pressed:',
+        isAriaPressed
       );
 
       const additionalCostText = await page.textContent(

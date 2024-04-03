@@ -146,7 +146,7 @@ async function saveProjectIdsToFile() {
   );
 }
 
-test("bulk registration with API data", async ({ page }) => {
+test("registration with API data", async ({ page }) => {
   test.setTimeout(180000);
   const users = await fetchDataFromSheet();
 
