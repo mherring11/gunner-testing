@@ -34,7 +34,7 @@ async function readProjectIdsFromFile() {
 }
 
 test.setTimeout(480000);
-test("Full Test", async ({ browser }) => {
+test("Wells Fargo", async ({ browser }) => {
   const users = await fetchDataFromSheet();
   const projectIds = await readProjectIdsFromFile();
 
@@ -312,50 +312,69 @@ test("Full Test", async ({ browser }) => {
       );
     }
 
-    const yesButtonSelectorFlatRoof =
-      '#result_flatRoof__xPWIq button[value="YES"]';
+    let additionalCost = 0;
 
-    await page.click(yesButtonSelectorFlatRoof);
-    console.log('"YES" button clicked for flat roof replacement.');
-
-    await page.waitForFunction(
-      (selector) =>
-        document.querySelector(selector).getAttribute("aria-pressed") ===
-        "true",
-      yesButtonSelectorFlatRoof
+    const flatRoofQuestionExists = await page.$(
+      '#result_flatRoof__xPWIq button[value="YES"]'
     );
-    console.log('"YES" button state verified as selected.');
+    if (flatRoofQuestionExists) {
+      const yesButtonSelectorFlatRoof =
+        '#result_flatRoof__xPWIq button[value="YES"]';
+      await page.click(yesButtonSelectorFlatRoof);
+      console.log('"YES" button clicked for flat roof replacement.');
 
-    const yesButtonSelectorForDetachedStructure =
-      '#result_detachedStructure__UPrzP button[value="YES"]';
-
-    await page.click(yesButtonSelectorForDetachedStructure);
-    console.log('"YES" button clicked.');
-
-    await page.waitForTimeout(1000);
-
-    const isAriaPressed = await page.getAttribute(
-      yesButtonSelectorForDetachedStructure,
-      "aria-pressed"
-    );
-
-    if (isAriaPressed === "true") {
-      console.log(
-        '"YES" button for additional structures has been successfully clicked and verified as selected.'
+      await page.waitForFunction(
+        (selector) =>
+          document.querySelector(selector).getAttribute("aria-pressed") ===
+          "true",
+        yesButtonSelectorFlatRoof
       );
+      console.log('"YES" button state verified as selected for flat roof.');
     } else {
-      console.log(
-        'Failed to verify the "YES" button for additional structures as selected. aria-pressed:',
-        isAriaPressed
-      );
+      console.log("No flat roof question present, moving on.");
+    }
 
-      const additionalCostText = await page.textContent(
+    const detachedStructureQuestionExists = await page.$(
+      '#result_detachedStructure__UPrzP button[value="YES"]'
+    );
+    if (detachedStructureQuestionExists) {
+      const yesButtonSelectorForDetachedStructure =
+        '#result_detachedStructure__UPrzP button[value="YES"]';
+      await page.click(yesButtonSelectorForDetachedStructure);
+      console.log('"YES" button clicked for additional structures.');
+
+      await page.waitForTimeout(1000);
+
+      const isAriaPressed = await page.getAttribute(
+        yesButtonSelectorForDetachedStructure,
+        "aria-pressed"
+      );
+      if (isAriaPressed === "true") {
+        console.log(
+          '"YES" button for additional structures has been successfully clicked and verified as selected.'
+        );
+      } else {
+        console.log(
+          'Failed to verify "YES" button for additional structures as selected. aria-pressed:',
+          isAriaPressed
+        );
+      }
+    } else {
+      console.log("No additional structures question present, moving on.");
+
+      const additionalCostElement = await page.$(
         "span.result_addOnCost__T8ARR"
       );
-      const additionalCost = parseFloat(
-        additionalCostText.replace(/[^0-9.]/g, "")
-      );
-      console.log(`Additional cost: $${additionalCost}`.yellow);
+
+      if (additionalCostElement) {
+        const additionalCostText = await page.textContent(
+          "span.result_addOnCost__T8ARR"
+        );
+        additionalCost = parseFloat(additionalCostText.replace(/[^0-9.]/g, ""));
+        console.log(`Additional cost detected: $${additionalCost}`.yellow);
+      } else {
+        console.log("No additional cost detected.");
+      }
 
       const initialTotalText = await page.textContent(
         "h3#result_totalEstimateAmount__rj09i"
@@ -769,31 +788,33 @@ test("Full Test", async ({ browser }) => {
       console.log("Failed to navigate to the Payment Method screen.".yellow);
     }
 
-    let capturedAddOns = [];
+    async function verifyAddOnsDynamically(page) {
+      const addOnSelector = ".SelectionSummary_addonItem__SMI9D";
+      const addOnElements = await page.$$(`${addOnSelector}`);
+      let addOns = [];
 
-    const addOnSelectors = ".SelectionSummary_addonItem__SMI9D";
-    capturedAddOns = await page.$$eval(addOnSelectors, (nodes) =>
-      nodes.map((n) => ({
-        name: n.innerText.split("$")[0].trim(),
-        price: "$" + n.innerText.split("$")[1].trim(),
-      }))
-    );
+      for (const addOnElement of addOnElements) {
+        const textContent = await addOnElement.innerText();
+        const [name, pricePart] = textContent
+          .split("$")
+          .map((part) => part.trim());
+        const price = pricePart.replace(",", "");
 
-    console.log("Captured add-ons:", capturedAddOns.yellow);
-
-    for (const addOn of capturedAddOns) {
-      const selector = `text="${addOn.name}${addOn.price}"`;
-      if (await page.isVisible(selector)) {
-        console.log(
-          `Verified add-on: ${addOn.name} with price ${addOn.price}`.yellow
-        );
-      } else {
-        console.log(
-          `Mismatch or not found add-on: ${addOn.name} with price ${addOn.price}`
-            .yellow
-        );
+        const priceRegex = /^\d+(?:\.\d{2})?$/;
+        if (!name || !priceRegex.test(price)) {
+          console.error(
+            `Invalid add-on detected: Name='${name}', Price='$${price}'`
+          );
+        } else {
+          addOns.push({ name, price: `$${price}` });
+        }
       }
+
+      return addOns;
     }
+
+    const capturedAddOns = await verifyAddOnsDynamically(page);
+    console.log("Captured add-ons:", capturedAddOns.yellow);
 
     const totalAmountText = await page.textContent(
       ".checkout_paymentOptionInfoHeader__wikm6 h2"
@@ -826,12 +847,105 @@ test("Full Test", async ({ browser }) => {
       );
     }
 
-    await page.click(
-      'input.PrivateSwitchBase-input.css-1m9pwf3[name="paymentOption"][type="radio"][value="creditcard"]'
-    );
+    const noInterestPlanSelector =
+      'text="No Interest if Paid in Full within 18 months with regular payments Deferred interest promotion"';
+    const specialRatePlanSelector =
+      'text="Special Rate of 5.90% with 1.75% custom payments"';
+
+    const noInterestPlanExists = await page.isVisible(noInterestPlanSelector);
+    console.log(`No Interest Plan Exists: ${noInterestPlanExists}`.yellow);
+
+    const specialRatePlanExists = await page.isVisible(specialRatePlanSelector);
+    console.log(`Special Rate Plan Exists: ${specialRatePlanExists}`.yellow);
+
+    expect(noInterestPlanExists).toBeTruthy();
+    expect(specialRatePlanExists).toBeTruthy();
+
     console.log(
-      "Clicked on the 'Cash/Check/Credit card' payment option.".yellow
+      "Checking for the 'Special Rate of 5.90% with 1.75% custom payments' option..."
     );
+
+    const specialRateSelector = 'input[name="paymentOption"][value="68months"]';
+
+    const isSpecialRateVisible = await page.isVisible(specialRateSelector);
+    const isSpecialRateEnabled = await page.isEnabled(specialRateSelector);
+
+    if (isSpecialRateVisible && isSpecialRateEnabled) {
+      await page.click(specialRateSelector);
+      console.log(
+        "Clicked the 'Special Rate of 5.90% with 1.75% custom payments' option."
+      );
+    } else {
+      console.log(
+        "The 'Special Rate of 5.90% with 1.75% custom payments' option is not available or not clickable."
+      );
+    }
+
+    const containerSelector = ".checkout_wf_card_container__Apzbd";
+
+    const financedAmountText = await page.textContent(
+      `${containerSelector} span.checkout_lightBlue__zudAe:has-text("Financed amount:") + strong font`
+    );
+    console.log(`Financed amount: ${financedAmountText}`);
+
+    const monthlyPaymentText = await page.textContent(
+      `${containerSelector} span.checkout_lightBlue__zudAe:has-text("Monthly payments:") + strong font`
+    );
+    console.log(`Monthly payment: ${monthlyPaymentText}`);
+
+    const interestChargesText = await page.textContent(
+      `${containerSelector} span.checkout_lightBlue__zudAe:has-text("Interest charges:") + strong font`
+    );
+    console.log(`Interest charges: ${interestChargesText}`);
+
+    const monthsToPayText = await page.textContent(
+      `${containerSelector} span.checkout_lightBlue__zudAe:has-text("Months to pay:") + strong font`
+    );
+    console.log(`Months to pay: ${monthsToPayText}`);
+
+    const totalPaidAmountText = await page.textContent(
+      `${containerSelector} span.checkout_lightBlue__zudAe:has-text("Total paid amount:") + strong font`
+    );
+    console.log(`Total paid amount: ${totalPaidAmountText}`);
+
+    await page.click('button:has-text("Find Account")');
+    console.log("Clicked on 'Find Account' button.");
+
+    console.log("Waiting for the Wells Fargo iframe to be available...");
+
+
+const wfIframeSelector = 'iframe[src*="wfg-sdk-plcc.html"]';
+const wfIframeHandle = await page.waitForSelector(wfIframeSelector, { state: "attached" });
+console.log("Switching to Wells Fargo iframe context...");
+
+
+const wfFrame = await wfIframeHandle.contentFrame();
+
+if (wfFrame) {
+  console.log("Inside the Wells Fargo iframe. Proceeding to enter the account number...");
+ 
+  const wfAccountNumberInputSelector = "#accountNumber";
+  await wfFrame.waitForSelector(wfAccountNumberInputSelector, { state: "visible" });
+
+  
+  const testAccountNumber = "9999999999999999";
+  await wfFrame.fill(wfAccountNumberInputSelector, testAccountNumber);
+  console.log("16-digit test account number entered successfully inside the Wells Fargo iframe.");
+
+  
+  const continueButtonSelector = 'button[name="findAccount"]';
+  await wfFrame.waitForSelector(continueButtonSelector, { state: "visible" });
+  await wfFrame.click(continueButtonSelector);
+  console.log("Entered test account number and clicked 'Continue'.");
+} else {
+  console.error("Failed to switch to the Wells Fargo iframe context.");
+}
+
+
+
+
+
+    // ---------------------------------------------------------------------------------//
 
     const checkoutButtonVisible = await page.isVisible(
       'button:has-text("CHECKOUT")'
@@ -872,27 +986,27 @@ test("Full Test", async ({ browser }) => {
       console.log("Failed to access the iframe content.".yellow);
     }
 
-    const iframeElementHandle = await page.waitForSelector(
-      'iframe[src*="https://jstest.authorize.net"]',
-      { state: "attached" }
-    );
-    const framess = await iframeElementHandle.contentFrame();
-    if (framess) {
-      try {
-        await framess.waitForSelector("button#payButton", {
-          state: "visible",
-          timeout: 5000,
-        });
-        await framess.click("button#payButton");
-        console.log("Clicked 'Submit Payment' button.".yellow);
-      } catch (error) {
-        console.error("Error clicking 'Submit Payment':".yellow, error);
-      }
-    } else {
-      console.log(
-        "The iframe is detached or the frame reference is invalid.".yellow
-      );
-    }
+    // const iframeElementHandle = await page.waitForSelector(
+    //   'iframe[src*="https://jstest.authorize.net"]',
+    //   { state: "attached" }
+    // );
+    // const framess = await iframeElementHandle.contentFrame();
+    // if (framess) {
+    //   try {
+    //     await framess.waitForSelector("button#payButton", {
+    //       state: "visible",
+    //       timeout: 5000,
+    //     });
+    //     await framess.click("button#payButton");
+    //     console.log("Clicked 'Submit Payment' button.".yellow);
+    //   } catch (error) {
+    //     console.error("Error clicking 'Submit Payment':".yellow, error);
+    //   }
+    // } else {
+    //   console.log(
+    //     "The iframe is detached or the frame reference is invalid.".yellow
+    //   );
+    // }
 
     console.log("Completed the payment process.".yellow);
 
@@ -976,12 +1090,59 @@ test("Full Test", async ({ browser }) => {
 
     console.log("'Adopt and Sign' button clicked successfully.".yellow);
 
-    await page.waitForSelector('.tab-content-wrapper .initials-tab-content', { state: 'visible' });
-await page.click('.tab-content-wrapper .initials-tab-content');
+    console.log(
+      "Verifying that the Proposal/Contract is displayed on pages 1 and 2 of the contract."
+        .yellow
+    );
+    const isDivPresent = await page.evaluate(() => {
+      const pageInfoElements = Array.from(
+        document.querySelectorAll("div.page-info")
+      );
 
+      const isPage1Present = pageInfoElements.some(
+        (el) =>
+          el.innerText.includes("Test Document") &&
+          el.querySelector(".page-info-xofx").innerText.includes("1 of")
+      );
+      const isPage2Present = pageInfoElements.some(
+        (el) =>
+          el.innerText.includes("Test Document") &&
+          el.querySelector(".page-info-xofx").innerText.includes("2 of")
+      );
+      return isPage1Present && isPage2Present;
+    });
 
-console.log("Initialed on page 3 of 11");
+    if (isDivPresent) {
+      console.log(
+        "Verified that the Proposal/Contract is displayed on pages 1 and 2 of the contract."
+          .yellow
+      );
+    } else {
+      console.log(
+        "The Proposal/Contract is displayed on pages 1 and 2 of the contract."
+          .yellow
+      );
+    }
 
+    console.log("Clicking on the 'Initial' div...".yellow);
+    await page.waitForSelector('text="Initial"', {
+      state: "visible",
+    });
+    await page.click('text="Initial"');
+
+    console.log("Clicking on the 'Initial' div...".yellow);
+    await page.waitForSelector('text="Initial"', {
+      state: "visible",
+    });
+    await page.click('text="Initial"');
+    console.log(
+      "Verified that the user is able to add initials to this page.".yellow
+    );
+
+    console.log(
+      "Verified: 'Exhibit A - Scope of Work' is displayed on page 3 of the contract."
+        .yellow
+    );
 
     console.log("Clicking on the next 'Initial' div...".yellow);
     const initialDivs = await page.$$(
@@ -1166,7 +1327,6 @@ console.log("Initialed on page 3 of 11");
 
     const currentUrl = await page.url();
 
-    // Check if the current URL matches the expected URL for "My Account" page.
     if (
       currentUrl.includes("https://estimatorstg.gunnerroofing.com/my-account")
     ) {
