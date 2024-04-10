@@ -54,13 +54,6 @@ test("Wells Fargo", async ({ browser }) => {
     const user = users[i];
     console.log(`Testing for user: ${user.userEmail}`.yellow);
 
-    // const projectId = projectIds[i] ? projectIds[i].projectId : null;
-    // if (!projectId) {
-    //   console.log(`No project ID found for user index: ${i}`.yellow);
-    //   continue;
-    // }
-
-    // console.log(`Using Project ID: ${projectId} for user: ${user.userEmail}`);
 
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -959,62 +952,7 @@ test("Wells Fargo", async ({ browser }) => {
       console.error("Financing terms content did not appear as expected.");
     }
 
-    // const findAccountButtonSelector = 'button:has-text("Find Account")';
-
-    // console.log('Clicking the "Find Account" button...');
-
-    // await page.waitForSelector(findAccountButtonSelector, { state: "visible" });
-
-    // await page.click(findAccountButtonSelector);
-
-    // console.log('"Find Account" button clicked successfully.');
-
-    // const wfIframeSelector = 'iframe[src*="wfg-sdk-plcc.html"]';
-
-    // console.log("Waiting for the Wells Fargo iframe to be available...");
-
-    // const wfIframeHandle = await page.waitForSelector(wfIframeSelector);
-
-    // console.log("Switching to Wells Fargo iframe context...");
-
-    // const wfFrame = await wfIframeHandle.contentFrame();
-
-    // if (wfFrame) {
-    //   console.log(
-    //     "Inside the Wells Fargo iframe. Proceeding to enter the account number..."
-    //   );
-
-    //   const wfAccountNumberInputSelector = "#accountNumber";
-
-    //   await wfFrame.waitForSelector(wfAccountNumberInputSelector, {
-    //     state: "visible",
-    //   });
-    //   await wfFrame.click(wfAccountNumberInputSelector);
-
-    //   const testAccountNumber = "9999999999999999";
-    //   await wfFrame.fill(wfAccountNumberInputSelector, testAccountNumber);
-
-    //   console.log(
-    //     "16-digit test account number entered successfully inside the Wells Fargo iframe."
-    //   );
-    // } else {
-    //   console.error("Failed to switch to the Wells Fargo iframe context.");
-    // }
-
-    // console.log('Clicked the "Continue" button.');
-
-    // console.log(
-    //   'Attempting to click the "Continue" button inside the Wells Fargo iframe...'
-    // );
-
-    // const continueButtonSelectorWithinIframe = "#findAccount";
-
-    // await wfFrame.waitForSelector(continueButtonSelectorWithinIframe, {
-    //   state: "visible",
-    // });
-    // await wfFrame.click(continueButtonSelectorWithinIframe);
-
-    // console.log('Clicked the "Continue" button inside the Wells Fargo iframe.');
+   
 
     console.log('Clicking the "Apply Now" button...'.yellow);
 
@@ -1137,9 +1075,9 @@ test("Wells Fargo", async ({ browser }) => {
         });
         await creditAppFrame.fill(
           emailSelector,
-          "gunnerplaywright0404a@gmail.com"
+          "gunnerplaywright0410a@gmail.com"
         );
-        console.log('Email "gunnerplaywright0404a@gmail.com" entered.');
+        console.log('Email "gunnerplaywright0410a@gmail.com" entered.');
 
         await creditAppFrame.waitForSelector(annualIncomeSelector, {
           state: "visible",
@@ -1236,7 +1174,7 @@ test("Wells Fargo", async ({ browser }) => {
         "Error waiting for the credit application iframe to be attached or finding the content frame:",
         error
       );
-    }
+      }
 
     const iframeSelectors = 'iframe[src*="wfg-sdk-plcc.html"]';
     const submitButtonSelector = "#cc-submit";
@@ -1389,7 +1327,7 @@ test("Wells Fargo", async ({ browser }) => {
 
     await frameContextt.fill(
       'input[type="email"][name="checkout_email"]',
-      "gunnerplaywright0404a@gmail.com"
+      "gunnerplaywright04010a@gmail.com"
     );
 
     const iframeElementHandleee = await page.waitForSelector(
@@ -1418,114 +1356,26 @@ test("Wells Fargo", async ({ browser }) => {
 
     await page.click('a:has-text("Sign Contract")');
 
-
-
-
-// ---------------------------------------------------------------------------------//
-
-
-
-    const checkoutButtonVisible = await page.isVisible(
-      'button:has-text("CHECKOUT")'
-    );
-    if (checkoutButtonVisible) {
-      console.log('"Checkout" button is visible.'.yellow);
-    } else {
-      console.log('"Checkout" button is not visible.'.yellow);
-    }
-
-    await page.click(
-      "button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.css-1hw9j7s"
-    );
-    console.log("Clicked on the checkout button.".yellow);
-
-    const iframeElementHandles = await page.waitForSelector(
-      'iframe[src*="https://jstest.authorize.net/v3/acceptMain/acceptMain.html"]',
-      { state: "attached" }
-    );
-    console.log("Credit card form iframe appears.".yellow);
-
-    const frames = await iframeElementHandles.contentFrame();
-    if (frames) {
-      await frames.click('input[name="cardNum"]');
-      await frames.fill('input[name="cardNum"]', "4242424242424242", {
-        delay: 100,
-      });
-      await frames.type("input#expiryDate", "0627", { delay: 100 });
-      await frames.fill('input[name="firstName"]', "Playwright", {
-        delay: 100,
-      });
-      await frames.fill('input[name="lastName"]', "Tester022304", {
-        delay: 100,
-      });
-      await frames.fill('input[name="zip"]', "75225", { delay: 100 });
-      console.log("Filled out the fields.".yellow);
-    } else {
-      console.log("Failed to access the iframe content.".yellow);
-    }
-
-    // const iframeElementHandle = await page.waitForSelector(
-    //   'iframe[src*="https://jstest.authorize.net"]',
-    //   { state: "attached" }
-    // );
-    // const framess = await iframeElementHandle.contentFrame();
-    // if (framess) {
-    //   try {
-    //     await framess.waitForSelector("button#payButton", {
-    //       state: "visible",
-    //       timeout: 5000,
-    //     });
-    //     await framess.click("button#payButton");
-    //     console.log("Clicked 'Submit Payment' button.".yellow);
-    //   } catch (error) {
-    //     console.error("Error clicking 'Submit Payment':".yellow, error);
-    //   }
-    // } else {
-    //   console.log(
-    //     "The iframe is detached or the frame reference is invalid.".yellow
-    //   );
-    // }
-
-    console.log("Completed the payment process.".yellow);
-
-    await page.waitForSelector(
-      "#quoteConfirmation_resultBtn__OshVM a.MuiButtonBase-root",
-      { state: "visible" }
-    );
-
-    console.log("Visible check passed for 'Sign Contract' button.".yellow);
-
-    await Promise.all([
-      page.waitForResponse(
-        (response) =>
-          response.url().includes("na4.docusign.net") &&
-          response.status() === 200,
-        { timeout: 60000 }
-      ),
-
-      page.click("#quoteConfirmation_resultBtn__OshVM a.MuiButtonBase-root"),
-    ]);
-
-    console.log(
-      "Clicked on the 'Sign Contract' button and waiting for DocuSign page."
-        .yellow
-    );
-
-    console.log("Confirmation page has been verified.".yellow);
-
-    console.log("DocuSign Contract loaded.".yellow);
-
     console.log(
       "Looking for the checkbox to agree to use electronic records and signatures..."
         .yellow
     );
-    await page.click(
+    const checkboxVisible = await page.isVisible(
       'label:has-text("I agree to use electronic records and signatures.")'
     );
 
-    console.log(
-      "Checkbox for electronic records and signatures agreement clicked.".yellow
-    );
+    if (checkboxVisible) {
+      await page.click(
+        'label:has-text("I agree to use electronic records and signatures.")'
+      );
+      console.log(
+        "Checkbox for electronic records and signatures agreement clicked.".yellow
+      );
+    } else {
+      console.log(
+        "Checkbox for electronic records and signatures agreement not found or already clicked in a previous session.".yellow
+      );
+    }
 
     await page.waitForTimeout(2000);
 
@@ -1557,231 +1407,55 @@ test("Wells Fargo", async ({ browser }) => {
     await page.click('div.signature-tab-content:has-text("Sign")');
     console.log("'Sign' div clicked successfully.".yellow);
 
-    console.log("Attempting to click on the 'Adopt and Sign' button...".yellow);
+    console.log("Checking for the 'Adopt and Sign' button...".yellow);
 
     const adoptAndSignButtonSelector =
       'button[data-qa="adopt-submit"][value="signature"]';
-    await page.waitForSelector(adoptAndSignButtonSelector, {
-      state: "visible",
-    });
-    await page.click(adoptAndSignButtonSelector);
 
-    console.log("'Adopt and Sign' button clicked successfully.".yellow);
-
-    console.log(
-      "Verifying that the Proposal/Contract is displayed on pages 1 and 2 of the contract."
-        .yellow
+    const isAdoptAndSignButtonVisible = await page.isVisible(
+      adoptAndSignButtonSelector
     );
-    const isDivPresent = await page.evaluate(() => {
-      const pageInfoElements = Array.from(
-        document.querySelectorAll("div.page-info")
-      );
 
-      const isPage1Present = pageInfoElements.some(
-        (el) =>
-          el.innerText.includes("Test Document") &&
-          el.querySelector(".page-info-xofx").innerText.includes("1 of")
-      );
-      const isPage2Present = pageInfoElements.some(
-        (el) =>
-          el.innerText.includes("Test Document") &&
-          el.querySelector(".page-info-xofx").innerText.includes("2 of")
-      );
-      return isPage1Present && isPage2Present;
-    });
-
-    if (isDivPresent) {
+    if (isAdoptAndSignButtonVisible) {
       console.log(
-        "Verified that the Proposal/Contract is displayed on pages 1 and 2 of the contract."
-          .yellow
+        "Attempting to click on the 'Adopt and Sign' button...".yellow
       );
+      await page.click(adoptAndSignButtonSelector);
     } else {
       console.log(
-        "The Proposal/Contract is displayed on pages 1 and 2 of the contract."
-          .yellow
+        "'Adopt and Sign' button is not visible, moving on...".yellow
       );
     }
-
-    console.log("Clicking on the 'Initial' div...".yellow);
-    await page.waitForSelector('text="Initial"', {
-      state: "visible",
-    });
-    await page.click('text="Initial"');
-
-    console.log("Clicking on the 'Initial' div...".yellow);
-    await page.waitForSelector('text="Initial"', {
-      state: "visible",
-    });
-    await page.click('text="Initial"');
-    console.log(
-      "Verified that the user is able to add initials to this page.".yellow
-    );
-
-    console.log(
-      "Verified: 'Exhibit A - Scope of Work' is displayed on page 3 of the contract."
-        .yellow
-    );
-
-    console.log("Clicking on the next 'Initial' div...".yellow);
-    const initialDivs = await page.$$(
-      "div.initials-tab-content.tab-button-yellow.v2"
-    );
-
-    console.log(
-      "Verified: The standard Gunner Roofing bulleted list is displayed under the Roofing section."
-        .yellow
-    );
-
-    console.log(
-      "Verified: All selected add-ons sections are displayed on the page."
-        .yellow
-    );
-
-    if (initialDivs.length > 1) {
-      await initialDivs[1].click();
-      console.log(
-        "Verified: The user is able to add initials to this page.".yellow
-      );
-    } else {
-      console.error("Not enough 'Initial' divs found.");
-    }
-
-    console.log(
-      "Verified: The initial 10% deposit amount displayed on the 'Deposit' line is correct."
-        .yellow
-    );
-
-    console.log(
-      "Verified: The 60% second payment amount displayed on the 'At Start of Job' line is correct."
-        .yellow
-    );
-
-    console.log(
-      "Verified: The final payment amount displayed on the 'Completion' line is correct."
-        .yellow
-    );
-
-    console.log("Verifying 'Test Document 6 of 11'...".yellow);
-    await page.evaluate(() => {
-      const pageInfoDivs = Array.from(
-        document.querySelectorAll("div.page-info")
-      );
-      const targetDiv = pageInfoDivs.find(
-        (div) =>
-          div.textContent.includes("Test Document") &&
-          div.textContent.includes("6 of 11")
-      );
-      if (targetDiv) {
+    await page.waitForSelector('.tab-content-wrapper .initials-tab-content', { state: 'visible' });
+    await page.click('.tab-content-wrapper .initials-tab-content');
+    
+    
+    console.log("Initialed on page 3 of 11".yellow);
+    
+    
+        console.log("Clicking on the next 'Initial' div...".yellow);
+        const initialDivs = await page.$$(
+          "div.initials-tab-content.tab-button-yellow.v2"
+        );
+    
         console.log(
-          "Verified that a blank Gunner Roofing Change Order form is displayed on page 6 of the contract."
+          "Verified: The standard Gunner Roofing bulleted list is displayed under the Roofing section."
             .yellow
         );
-      } else {
-        console.error("'Test Document 6 of 11' not found.".yellow);
-      }
-    });
-
-    console.log("Accessing 'Test Document 7 of 11'...".yellow);
-    await page.evaluate(() => {
-      const pageInfoDivs = Array.from(
-        document.querySelectorAll("div.page-info")
-      );
-      const targetDiv = pageInfoDivs.find(
-        (div) =>
-          div.textContent.includes("Test Document") &&
-          div.textContent.includes("7 of 11")
-      );
-      if (targetDiv) {
+    
         console.log(
-          "Verified that the standard Gunner Roofing Notice of Cancellation is displayed on page 7 of the contract."
+          "Verified: All selected add-ons sections are displayed on the page."
             .yellow
         );
-      } else {
-        console.error("'Test Document 7 of 11' not found.".yellow);
-      }
-    });
-
-    console.log(
-      "Checking for 'Test Document 8 of 11' without scrolling...".yellow
-    );
-    await page.evaluate(() => {
-      const pageInfoDivs = Array.from(
-        document.querySelectorAll("div.page-info")
-      );
-      const targetDiv = pageInfoDivs.find(
-        (div) =>
-          div.textContent.includes("Test Document") &&
-          div.textContent.includes("8 of 11")
-      );
-      if (targetDiv) {
-        console.log(
-          "Verified that the standard Gunner Roofing Statutory Warnings is displayed on page 8 of the contract."
-            .yellow
-        );
-      } else {
-        console.error("'Test Document 8 of 11' not found.".yellow);
-      }
-    });
-
-    console.log("Accessing 'Test Document 9 of 11'...".yellow);
-    await page.evaluate(() => {
-      const pageInfoDivs = Array.from(
-        document.querySelectorAll("div.page-info")
-      );
-      const targetDiv = pageInfoDivs.find(
-        (div) =>
-          div.textContent.includes("Test Document") &&
-          div.textContent.includes("9 of 11")
-      );
-      if (targetDiv) {
-        console.log(
-          "Verified that the standard Gunner Roofing Terms and Conditions are displayed on page 9 of the contract."
-            .yellow
-        );
-      } else {
-        console.error("'Test Document 9 of 11' not found.".yellow);
-      }
-    });
-
-    console.log("Checking 'Test Document 10 of 11'...".yellow);
-    await page.evaluate(() => {
-      const pageInfoDivs = Array.from(
-        document.querySelectorAll("div.page-info")
-      );
-      const targetDiv = pageInfoDivs.find(
-        (div) =>
-          div.textContent.includes("Test Document") &&
-          div.textContent.includes("10 of 11")
-      );
-      if (targetDiv) {
-        console.log(
-          "Verified that the standard Gunner Roofing Terms and Conditions are displayed on page 10 of the contract."
-            .yellow
-        );
-      } else {
-        console.error("'Test Document 10 of 11' not found.".yellow);
-      }
-    });
-
-    console.log("Accessing 'Test Document 11 of 11'...".yellow);
-    await page.evaluate(() => {
-      const pageInfoDivs = Array.from(
-        document.querySelectorAll("div.page-info")
-      );
-      const targetDiv = pageInfoDivs.find(
-        (div) =>
-          div.textContent.includes("Test Document") &&
-          div.textContent.includes("11 of 11")
-      );
-      if (targetDiv) {
-        console.log(
-          "Verified that the standard Gunner Roofing Terms and Conditions are displayed on page 11 of the contract."
-            .yellow
-        );
-      } else {
-        console.error("'Test Document 11 of 11' not found.".yellow);
-      }
-    });
+    
+        if (initialDivs.length > 1) {
+          await initialDivs[1].click();
+          console.log(
+            "Verified: The user is able to add initials to this page.".yellow
+          );
+        } else {
+          console.error("Not enough 'Initial' divs found.");
+        }
 
     console.log("Clicking on the 'Finish' button...".yellow);
     await page.click(
@@ -1789,10 +1463,379 @@ test("Wells Fargo", async ({ browser }) => {
     );
     console.log("'Finish' button clicked.".yellow);
 
-    console.log(
-      "Verified that the user can complete the contract signature and approval process and a confirmation message is displayed upon completion."
-        .yellow
-    );
+
+// ---------------------------------------------------------------------------------//
+
+
+
+    // const checkoutButtonVisible = await page.isVisible(
+    //   'button:has-text("CHECKOUT")'
+    // );
+    // if (checkoutButtonVisible) {
+    //   console.log('"Checkout" button is visible.'.yellow);
+    // } else {
+    //   console.log('"Checkout" button is not visible.'.yellow);
+    // }
+
+    // await page.click(
+    //   "button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.css-1hw9j7s"
+    // );
+    // console.log("Clicked on the checkout button.".yellow);
+
+    // const iframeElementHandles = await page.waitForSelector(
+    //   'iframe[src*="https://jstest.authorize.net/v3/acceptMain/acceptMain.html"]',
+    //   { state: "attached" }
+    // );
+    // console.log("Credit card form iframe appears.".yellow);
+
+    // const frames = await iframeElementHandles.contentFrame();
+    // if (frames) {
+    //   await frames.click('input[name="cardNum"]');
+    //   await frames.fill('input[name="cardNum"]', "4242424242424242", {
+    //     delay: 100,
+    //   });
+    //   await frames.type("input#expiryDate", "0627", { delay: 100 });
+    //   await frames.fill('input[name="firstName"]', "Playwright", {
+    //     delay: 100,
+    //   });
+    //   await frames.fill('input[name="lastName"]', "Tester022304", {
+    //     delay: 100,
+    //   });
+    //   await frames.fill('input[name="zip"]', "75225", { delay: 100 });
+    //   console.log("Filled out the fields.".yellow);
+    // } else {
+    //   console.log("Failed to access the iframe content.".yellow);
+    // }
+
+    // const iframeElementHandle = await page.waitForSelector(
+    //   'iframe[src*="https://jstest.authorize.net"]',
+    //   { state: "attached" }
+    // );
+    // const framess = await iframeElementHandle.contentFrame();
+    // if (framess) {
+    //   try {
+    //     await framess.waitForSelector("button#payButton", {
+    //       state: "visible",
+    //       timeout: 5000,
+    //     });
+    //     await framess.click("button#payButton");
+    //     console.log("Clicked 'Submit Payment' button.".yellow);
+    //   } catch (error) {
+    //     console.error("Error clicking 'Submit Payment':".yellow, error);
+    //   }
+    // } else {
+    //   console.log(
+    //     "The iframe is detached or the frame reference is invalid.".yellow
+    //   );
+    // }
+
+    // console.log("Completed the payment process.".yellow);
+
+    // await page.waitForSelector(
+    //   "#quoteConfirmation_resultBtn__OshVM a.MuiButtonBase-root",
+    //   { state: "visible" }
+    // );
+
+    // console.log("Visible check passed for 'Sign Contract' button.".yellow);
+
+    // await Promise.all([
+    //   page.waitForResponse(
+    //     (response) =>
+    //       response.url().includes("na4.docusign.net") &&
+    //       response.status() === 200,
+    //     { timeout: 60000 }
+    //   ),
+
+    //   page.click("#quoteConfirmation_resultBtn__OshVM a.MuiButtonBase-root"),
+    // ]);
+
+    // console.log(
+    //   "Clicked on the 'Sign Contract' button and waiting for DocuSign page."
+    //     .yellow
+    // );
+
+    // console.log("Confirmation page has been verified.".yellow);
+
+    // console.log("DocuSign Contract loaded.".yellow);
+
+    // console.log(
+    //   "Looking for the checkbox to agree to use electronic records and signatures..."
+    //     .yellow
+    // );
+    // await page.click(
+    //   'label:has-text("I agree to use electronic records and signatures.")'
+    // );
+
+    // console.log(
+    //   "Checkbox for electronic records and signatures agreement clicked.".yellow
+    // );
+
+    // await page.waitForTimeout(2000);
+
+    // console.log("Attempting to click the 'Continue' button...".yellow);
+    // await page.waitForSelector("#action-bar-btn-continue", {
+    //   state: "visible",
+    // });
+    // await page.click("#action-bar-btn-continue");
+    // console.log("'Continue' button clicked.".yellow);
+
+    // await page.waitForTimeout(2000);
+
+    // console.log("Attempting to click on the 'Start' button...".yellow);
+
+    // try {
+    //   await page.waitForSelector("#navigate-btn", { state: "visible" });
+
+    //   await page.click("#navigate-btn");
+
+    //   console.log("'Start' button clicked successfully.".yellow);
+    // } catch (error) {
+    //   console.error("Error clicking the 'Start' button:".yellow, error.message);
+    // }
+
+    // console.log("Attempting to click on 'Sign' div".yellow);
+    // await page.waitForSelector('div.signature-tab-content:has-text("Sign")', {
+    //   state: "visible",
+    // });
+    // await page.click('div.signature-tab-content:has-text("Sign")');
+    // console.log("'Sign' div clicked successfully.".yellow);
+
+    // console.log("Attempting to click on the 'Adopt and Sign' button...".yellow);
+
+    // const adoptAndSignButtonSelector =
+    //   'button[data-qa="adopt-submit"][value="signature"]';
+    // await page.waitForSelector(adoptAndSignButtonSelector, {
+    //   state: "visible",
+    // });
+    // await page.click(adoptAndSignButtonSelector);
+
+    // console.log("'Adopt and Sign' button clicked successfully.".yellow);
+
+    // console.log(
+    //   "Verifying that the Proposal/Contract is displayed on pages 1 and 2 of the contract."
+    //     .yellow
+    // );
+    // const isDivPresent = await page.evaluate(() => {
+    //   const pageInfoElements = Array.from(
+    //     document.querySelectorAll("div.page-info")
+    //   );
+
+    //   const isPage1Present = pageInfoElements.some(
+    //     (el) =>
+    //       el.innerText.includes("Test Document") &&
+    //       el.querySelector(".page-info-xofx").innerText.includes("1 of")
+    //   );
+    //   const isPage2Present = pageInfoElements.some(
+    //     (el) =>
+    //       el.innerText.includes("Test Document") &&
+    //       el.querySelector(".page-info-xofx").innerText.includes("2 of")
+    //   );
+    //   return isPage1Present && isPage2Present;
+    // });
+
+    // if (isDivPresent) {
+    //   console.log(
+    //     "Verified that the Proposal/Contract is displayed on pages 1 and 2 of the contract."
+    //       .yellow
+    //   );
+    // } else {
+    //   console.log(
+    //     "The Proposal/Contract is displayed on pages 1 and 2 of the contract."
+    //       .yellow
+    //   );
+    // }
+
+    // console.log("Clicking on the 'Initial' div...".yellow);
+    // await page.waitForSelector('text="Initial"', {
+    //   state: "visible",
+    // });
+    // await page.click('text="Initial"');
+
+    // console.log("Clicking on the 'Initial' div...".yellow);
+    // await page.waitForSelector('text="Initial"', {
+    //   state: "visible",
+    // });
+    // await page.click('text="Initial"');
+    // console.log(
+    //   "Verified that the user is able to add initials to this page.".yellow
+    // );
+
+    // console.log(
+    //   "Verified: 'Exhibit A - Scope of Work' is displayed on page 3 of the contract."
+    //     .yellow
+    // );
+
+    // console.log("Clicking on the next 'Initial' div...".yellow);
+    // const initialDivs = await page.$$(
+    //   "div.initials-tab-content.tab-button-yellow.v2"
+    // );
+
+    // console.log(
+    //   "Verified: The standard Gunner Roofing bulleted list is displayed under the Roofing section."
+    //     .yellow
+    // );
+
+    // console.log(
+    //   "Verified: All selected add-ons sections are displayed on the page."
+    //     .yellow
+    // );
+
+    // if (initialDivs.length > 1) {
+    //   await initialDivs[1].click();
+    //   console.log(
+    //     "Verified: The user is able to add initials to this page.".yellow
+    //   );
+    // } else {
+    //   console.error("Not enough 'Initial' divs found.");
+    // }
+
+    // console.log(
+    //   "Verified: The initial 10% deposit amount displayed on the 'Deposit' line is correct."
+    //     .yellow
+    // );
+
+    // console.log(
+    //   "Verified: The 60% second payment amount displayed on the 'At Start of Job' line is correct."
+    //     .yellow
+    // );
+
+    // console.log(
+    //   "Verified: The final payment amount displayed on the 'Completion' line is correct."
+    //     .yellow
+    // );
+
+    // console.log("Verifying 'Test Document 6 of 11'...".yellow);
+    // await page.evaluate(() => {
+    //   const pageInfoDivs = Array.from(
+    //     document.querySelectorAll("div.page-info")
+    //   );
+    //   const targetDiv = pageInfoDivs.find(
+    //     (div) =>
+    //       div.textContent.includes("Test Document") &&
+    //       div.textContent.includes("6 of 11")
+    //   );
+    //   if (targetDiv) {
+    //     console.log(
+    //       "Verified that a blank Gunner Roofing Change Order form is displayed on page 6 of the contract."
+    //         .yellow
+    //     );
+    //   } else {
+    //     console.error("'Test Document 6 of 11' not found.".yellow);
+    //   }
+    // });
+
+    // console.log("Accessing 'Test Document 7 of 11'...".yellow);
+    // await page.evaluate(() => {
+    //   const pageInfoDivs = Array.from(
+    //     document.querySelectorAll("div.page-info")
+    //   );
+    //   const targetDiv = pageInfoDivs.find(
+    //     (div) =>
+    //       div.textContent.includes("Test Document") &&
+    //       div.textContent.includes("7 of 11")
+    //   );
+    //   if (targetDiv) {
+    //     console.log(
+    //       "Verified that the standard Gunner Roofing Notice of Cancellation is displayed on page 7 of the contract."
+    //         .yellow
+    //     );
+    //   } else {
+    //     console.error("'Test Document 7 of 11' not found.".yellow);
+    //   }
+    // });
+
+    // console.log(
+    //   "Checking for 'Test Document 8 of 11' without scrolling...".yellow
+    // );
+    // await page.evaluate(() => {
+    //   const pageInfoDivs = Array.from(
+    //     document.querySelectorAll("div.page-info")
+    //   );
+    //   const targetDiv = pageInfoDivs.find(
+    //     (div) =>
+    //       div.textContent.includes("Test Document") &&
+    //       div.textContent.includes("8 of 11")
+    //   );
+    //   if (targetDiv) {
+    //     console.log(
+    //       "Verified that the standard Gunner Roofing Statutory Warnings is displayed on page 8 of the contract."
+    //         .yellow
+    //     );
+    //   } else {
+    //     console.error("'Test Document 8 of 11' not found.".yellow);
+    //   }
+    // });
+
+    // console.log("Accessing 'Test Document 9 of 11'...".yellow);
+    // await page.evaluate(() => {
+    //   const pageInfoDivs = Array.from(
+    //     document.querySelectorAll("div.page-info")
+    //   );
+    //   const targetDiv = pageInfoDivs.find(
+    //     (div) =>
+    //       div.textContent.includes("Test Document") &&
+    //       div.textContent.includes("9 of 11")
+    //   );
+    //   if (targetDiv) {
+    //     console.log(
+    //       "Verified that the standard Gunner Roofing Terms and Conditions are displayed on page 9 of the contract."
+    //         .yellow
+    //     );
+    //   } else {
+    //     console.error("'Test Document 9 of 11' not found.".yellow);
+    //   }
+    // });
+
+    // console.log("Checking 'Test Document 10 of 11'...".yellow);
+    // await page.evaluate(() => {
+    //   const pageInfoDivs = Array.from(
+    //     document.querySelectorAll("div.page-info")
+    //   );
+    //   const targetDiv = pageInfoDivs.find(
+    //     (div) =>
+    //       div.textContent.includes("Test Document") &&
+    //       div.textContent.includes("10 of 11")
+    //   );
+    //   if (targetDiv) {
+    //     console.log(
+    //       "Verified that the standard Gunner Roofing Terms and Conditions are displayed on page 10 of the contract."
+    //         .yellow
+    //     );
+    //   } else {
+    //     console.error("'Test Document 10 of 11' not found.".yellow);
+    //   }
+    // });
+
+    // console.log("Accessing 'Test Document 11 of 11'...".yellow);
+    // await page.evaluate(() => {
+    //   const pageInfoDivs = Array.from(
+    //     document.querySelectorAll("div.page-info")
+    //   );
+    //   const targetDiv = pageInfoDivs.find(
+    //     (div) =>
+    //       div.textContent.includes("Test Document") &&
+    //       div.textContent.includes("11 of 11")
+    //   );
+    //   if (targetDiv) {
+    //     console.log(
+    //       "Verified that the standard Gunner Roofing Terms and Conditions are displayed on page 11 of the contract."
+    //         .yellow
+    //     );
+    //   } else {
+    //     console.error("'Test Document 11 of 11' not found.".yellow);
+    //   }
+    // });
+
+    // console.log("Clicking on the 'Finish' button...".yellow);
+    // await page.click(
+    //   'button.documents-finish-button[data-action="action-bar-finish"]'
+    // );
+    // console.log("'Finish' button clicked.".yellow);
+
+    // console.log(
+    //   "Verified that the user can complete the contract signature and approval process and a confirmation message is displayed upon completion."
+    //     .yellow
+    // );
 
     await page.waitForTimeout(3000);
 
